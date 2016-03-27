@@ -1,0 +1,257 @@
+﻿//$mainColor: #006665;
+$mainColor: #A9CF24;
+$accentColor: #A9CF24;
+$textColor: #4a4a4a;
+$otherColor: #eaebec;
+
+html, body {
+    font-family: "Open Sans","Helvetica","Arial",sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+paper-toolbar {
+    background-color: $mainColor !important;
+
+    &.header {
+        paper-icon-button[icon="menu"] {
+            margin-right: 0 !important;
+        }
+
+        nav {
+            height: 56px;
+            line-height: 56px;
+
+            a {
+                display: inline-block;
+                padding: 0 12px;
+                color: white !important;
+                text-decoration: none !important;
+            }
+        }
+    }
+}
+
+paper-header-panel[drawer] {
+    a {
+        display: block;
+        color: #333 !important;
+        text-decoration: none !important;
+        padding: 6px;
+        line-height: 32px;
+
+        &:hover {
+            background-color: #eee;
+        }
+
+        &:focus, &:active {
+            background-color: #ccc;
+        }
+    }
+}
+
+marked-element {
+    margin: 0 auto;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    margin: 1em 0;
+    padding: 0;
+    background-image: -webkit-linear-gradient(left, #ffffff, $mainColor, #ffffff);
+    background-image: -moz-linear-gradient(left, #ffffff, $mainColor, #ffffff);
+    background-image: -ms-linear-gradient(left, #ffffff, $mainColor, #ffffff);
+    background-image: -o-linear-gradient(left, #ffffff, $mainColor, #ffffff);
+    width: 150px;
+    left: calc(50% - 75px);
+    position: relative;
+    border: none;
+}
+
+google-map {
+    height: 500px;
+}
+
+section {
+    padding: 40px 80px;
+    box-sizing: border-box;
+    text-align: center;
+
+    marked-element {
+        max-width: 1000px;
+    }
+
+    [is-tablet] & {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    [is-phone] & {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    h2 {
+        font-size: 24px;
+        color: $textColor;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-top: 0;
+    }
+
+    &#Home {
+        background-image: url(images/Banner.jpg);
+        background-repeat: repeat-x;
+        background-size: cover;
+        background-position: center center;
+        color: $textColor;
+        min-height: 500px;
+        text-transform: uppercase;
+        position: relative;
+
+        [is-phone] & {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        &:before {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            content: " ";
+        }
+
+        marked-element {
+            max-width: 800px;
+        }
+
+        .title {
+            font-size: 48px;
+            line-height: normal;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+
+
+            [is-tablet] &, [is-phone] & {
+                font-size: 32px;
+            }
+        }
+
+        a {
+            color: white !important;
+            text-decoration: none !important;
+        }
+
+        paper-button {
+            background-color: $accentColor;
+            margin-top: 40px;
+            font-size: 18px;
+            line-height: 20px;
+            width: 150px;
+        }
+    }
+
+    &#OurStory {
+        .title {
+            font-weight: 600;
+        }
+
+        img {
+            max-height: 250px;
+            margin-left: 100px;
+        }
+
+        p {
+            text-indent: 50px;
+            text-align: justify;
+            font-size: 18px;
+            color: $textColor;
+        }
+    }
+
+    &#OurAffiliates {
+        border-top: 1px solid $otherColor;
+
+        .companies {
+            padding: 25px 12px 0 12px;
+        }
+
+        .company {
+            text-align: justify;
+            color: $textColor;
+            font-size: 16px;
+            border-color: $otherColor;
+            border-style: solid;
+            border-width: 0 0 3px 0;
+            margin: 25px 0 50px 0;
+            -moz-transition: border-color 0.55s ease;
+            -o-transition: border-color 0.55s ease;
+            -webkit-transition: border-color 0.55s ease;
+            transition: border-color 0.55s ease;
+
+            &:hover {
+                border-bottom-color: $mainColor;
+            }
+
+            &:first-child {
+                margin-top: 0;
+            }
+
+            .logo {
+                width: 128px;
+
+                > img {
+                    max-width: 80%;
+                }
+            }
+
+            > div.flex {
+                padding: 25px 12px 12px 12px;
+
+                > h4 {
+                    color: $mainColor;
+                    font-size: 25px;
+                    font-weight: 600;
+                    text-align: left;
+                }
+
+                a {
+                    color: $accentColor;
+                    font-weight: 600;
+                    text-decoration: none;
+                }
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &#Contact {
+        border-top: 1px solid #eaebec;
+        background-color: #FCFCFD;
+    }
+
+
+    &#References{
+        background-color:$mainColor;
+        color:white;
+        font-size:24px;
+        
+        letter-spacing:3px;
+    }
+}
+
+footer {
+    padding: 32px 16px;
+    color: white;
+    background-color: $mainColor;
+}

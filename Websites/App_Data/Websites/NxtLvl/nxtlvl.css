@@ -1,0 +1,169 @@
+﻿html, body {
+  font-family: "Open Sans","Helvetica","Arial",sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px; }
+
+paper-toolbar {
+  background-color: #A9CF24 !important; }
+  paper-toolbar.header paper-icon-button[icon="menu"] {
+    margin-right: 0 !important; }
+  paper-toolbar.header nav {
+    height: 56px;
+    line-height: 56px; }
+    paper-toolbar.header nav a {
+      display: inline-block;
+      padding: 0 12px;
+      color: white !important;
+      text-decoration: none !important; }
+
+paper-header-panel[drawer] a {
+  display: block;
+  color: #333 !important;
+  text-decoration: none !important;
+  padding: 6px;
+  line-height: 32px; }
+  paper-header-panel[drawer] a:hover {
+    background-color: #eee; }
+  paper-header-panel[drawer] a:focus, paper-header-panel[drawer] a:active {
+    background-color: #ccc; }
+
+marked-element {
+  margin: 0 auto; }
+
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  margin: 1em 0;
+  padding: 0;
+  background-image: -webkit-linear-gradient(left, #ffffff, #A9CF24, #ffffff);
+  background-image: -moz-linear-gradient(left, #ffffff, #A9CF24, #ffffff);
+  background-image: -ms-linear-gradient(left, #ffffff, #A9CF24, #ffffff);
+  background-image: -o-linear-gradient(left, #ffffff, #A9CF24, #ffffff);
+  width: 150px;
+  left: calc(50% - 75px);
+  position: relative;
+  border: none; }
+
+google-map {
+  height: 500px; }
+
+section {
+  padding: 40px 80px;
+  box-sizing: border-box;
+  text-align: center; }
+  section marked-element {
+    max-width: 1000px; }
+  [is-tablet] section {
+    padding-left: 24px;
+    padding-right: 24px; }
+  [is-phone] section {
+    padding-left: 0;
+    padding-right: 0; }
+  section h2 {
+    font-size: 24px;
+    color: #4a4a4a;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 0; }
+  section#Home {
+    background-image: url(images/Banner.jpg);
+    background-repeat: repeat-x;
+    background-size: cover;
+    background-position: center center;
+    color: #4a4a4a;
+    min-height: 500px;
+    text-transform: uppercase;
+    position: relative; }
+    [is-phone] section#Home {
+      padding-left: 12px;
+      padding-right: 12px; }
+    section#Home:before {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      content: " "; }
+    section#Home marked-element {
+      max-width: 800px; }
+    section#Home .title {
+      font-size: 48px;
+      line-height: normal;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600; }
+      [is-tablet] section#Home .title, [is-phone] section#Home .title {
+        font-size: 32px; }
+    section#Home a {
+      color: white !important;
+      text-decoration: none !important; }
+    section#Home paper-button {
+      background-color: #A9CF24;
+      margin-top: 40px;
+      font-size: 18px;
+      line-height: 20px;
+      width: 150px; }
+  section#OurStory .title {
+    font-weight: 600; }
+  section#OurStory img {
+    max-height: 250px;
+    margin-left: 100px; }
+  section#OurStory p {
+    text-indent: 50px;
+    text-align: justify;
+    font-size: 18px;
+    color: #4a4a4a; }
+  section#OurAffiliates {
+    border-top: 1px solid #eaebec; }
+    section#OurAffiliates .companies {
+      padding: 25px 12px 0 12px; }
+    section#OurAffiliates .company {
+      text-align: justify;
+      color: #4a4a4a;
+      font-size: 16px;
+      border-color: #eaebec;
+      border-style: solid;
+      border-width: 0 0 3px 0;
+      margin: 25px 0 50px 0;
+      -moz-transition: border-color 0.55s ease;
+      -o-transition: border-color 0.55s ease;
+      -webkit-transition: border-color 0.55s ease;
+      transition: border-color 0.55s ease; }
+      section#OurAffiliates .company:hover {
+        border-bottom-color: #A9CF24; }
+      section#OurAffiliates .company:first-child {
+        margin-top: 0; }
+      section#OurAffiliates .company .logo {
+        width: 128px; }
+        section#OurAffiliates .company .logo > img {
+          max-width: 80%; }
+      section#OurAffiliates .company > div.flex {
+        padding: 25px 12px 12px 12px; }
+        section#OurAffiliates .company > div.flex > h4 {
+          color: #A9CF24;
+          font-size: 25px;
+          font-weight: 600;
+          text-align: left; }
+        section#OurAffiliates .company > div.flex a {
+          color: #A9CF24;
+          font-weight: 600;
+          text-decoration: none; }
+      section#OurAffiliates .company:last-child {
+        margin-bottom: 0; }
+  section#Contact {
+    border-top: 1px solid #eaebec;
+    background-color: #FCFCFD; }
+  section#References {
+    background-color: #A9CF24;
+    color: white;
+    font-size: 24px;
+    letter-spacing: 3px; }
+
+footer {
+  padding: 32px 16px;
+  color: white;
+  background-color: #A9CF24; }
+

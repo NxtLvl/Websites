@@ -136,6 +136,21 @@
     <Content Include=".bowerrc">
       <DependentUpon>bower.json</DependentUpon>
     </Content>
+    <Content Include="App_Data\Websites\NxtLvl\Images\2sky_logo.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\Banner.jpg" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\favicon.ico" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\logo.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\ourStory.jpg" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\Rhea_logo.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\SoftN_logo.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\top.png" />
+    <Content Include="App_Data\Websites\NxtLvl\index.html" />
+    <Content Include="App_Data\Websites\NxtLvl\nxtlvl.css">
+      <DependentUpon>nxtlvl.scss</DependentUpon>
+    </Content>
+    <Content Include="App_Data\Websites\NxtLvl\nxtlvl.min.css">
+      <DependentUpon>nxtlvl.css</DependentUpon>
+    </Content>
     <Content Include="App_Data\Websites\Web²\index.html" />
     <Content Include="Global.asax" />
     <Content Include="libs\imports.html" />
@@ -179,6 +194,12 @@
     <Content Include="WebComponents\PageSection\page-section.js">
       <DependentUpon>page-section.ts</DependentUpon>
     </Content>
+    <Content Include="App_Data\Websites\NxtLvl\nxtlvl.scss" />
+    <Content Include="App_Data\Websites\NxtLvl\Pages\Contact.md" />
+    <Content Include="App_Data\Websites\NxtLvl\Pages\Home.md" />
+    <Content Include="App_Data\Websites\NxtLvl\Pages\OurAffiliates.md" />
+    <Content Include="App_Data\Websites\NxtLvl\Pages\OurStory.md" />
+    <Content Include="App_Data\Websites\NxtLvl\Pages\References.md" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -223,7 +244,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>20182</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

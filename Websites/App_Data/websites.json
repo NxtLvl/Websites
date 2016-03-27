@@ -5,13 +5,73 @@
         "*/old"
       ]
     },
-    "Web²": {
+    "NxtLvl": {
       "Label": {
-        "en": "Web²"
+        "en": "Nxt lvl",
+        "pt": "Nxt lvl"
       },
       "Type": 1,
       "Bindings": [
-        "*"
+        "*",
+        "nxtlvl.be"
+      ],
+      "DefaultUser": "b018c9d7-d713-4123-84c0-91b9b403482e",
+      "Pages": [
+        {
+          "Name": "Contact",
+          "Label": {
+            "en": "Contact",
+            "pt": "Contact"
+          },
+          "Queries": [],
+          "Offset": 10
+        },
+        {
+          "Name": "Home",
+          "Label": {
+            "en": "Home",
+            "pt": "Home"
+          },
+          "Queries": [],
+          "Offset": 5
+        },
+        {
+          "Name": "OurAffiliates",
+          "Label": {
+            "en": "Our affiliates",
+            "pt": "Our affiliates"
+          },
+          "Queries": [],
+          "Offset": 7
+        },
+        {
+          "Name": "OurStory",
+          "Label": {
+            "en": "Our story",
+            "pt": "Our story"
+          },
+          "Queries": [],
+          "Offset": 6
+        },
+        {
+          "Name": "References",
+          "Label": {
+            "en": "References",
+            "pt": "References"
+          },
+          "Queries": [],
+          "Offset": 8
+        }
+      ]
+    },
+    "Web²": {
+      "Label": {
+        "en": "Web²",
+        "pt": ""
+      },
+      "Type": 1,
+      "Bindings": [
+        "*/admin"
       ],
       "Pages": []
     }
