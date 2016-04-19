@@ -74,7 +74,8 @@ namespace Websites.Service
             {
                 var websiteContactTo = website["ContactTo"];
                 var websiteContactFrom = website["ContactFrom"];
-                if (string.IsNullOrEmpty(websiteContactTo) || string.IsNullOrEmpty(websiteContactFrom) || !Manager.Current.Mail.SendEmail(StringCipher.Decrypt(websiteContactFrom, Manager.Current.GetSetting("ContactEmailPassphrase")), StringCipher.Decrypt(websiteContactTo, Manager.Current.GetSetting("ContactEmailPassphrase")), "A message has been sent from " + website.Name, "Message from: " + string.Format("{0} <{1}>", (string)obj["Name"], (string)obj["Email"]) + "\n\n" + (string)obj["Message"]))
+                if (string.IsNullOrEmpty(websiteContactTo) || string.IsNullOrEmpty(websiteContactFrom) || 
+                    !Manager.Current.Mail.SendEmail(DecryptEmail(websiteContactFrom), DecryptEmail(websiteContactTo), "A message has been sent from " + website.Name, "Message from: " + string.Format("{0} <{1}>", (string)obj["Name"], (string)obj["Email"]) + "\n\n" + (string)obj["Message"]))
                     obj.AddNotification("No website contact information defined. The message could not be delivered", NotificationType.Error);
                 else
                     obj.AddNotification(website["ContactConfirmation"] ?? "Thank you for contacting us!", NotificationType.OK);
@@ -84,6 +85,11 @@ namespace Websites.Service
                 ServiceLocator.GetService<IExceptionService>().Log(e);
                 obj.AddNotification("No website contact information defined. The message could not be delivered", NotificationType.Error);
             }
+        }
+
+        private static string DecryptEmail(string email)
+        {
+            return string.Join(";", email.Split(';').Select(e => StringCipher.Decrypt(e, Manager.Current.GetSetting("ContactEmailPassphrase"))));
         }
 
         #region http://stackoverflow.com/questions/10168240/encrypting-decrypting-a-string-in-c-sharp
