@@ -210,7 +210,6 @@
     <Content Include="App_Data\Websites\NxtLvl\Pages\Contact.md" />
     <Content Include="App_Data\Websites\NxtLvl\Pages\Home.md" />
     <Content Include="App_Data\Websites\NxtLvl\Pages\OurAffiliates.md" />
-    <Content Include="App_Data\Websites\NxtLvl\Pages\References.md" />
     <Content Include="App_Data\Websites\NxtLvl\Pages\Mission.md" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
@@ -258,7 +257,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>20182</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
