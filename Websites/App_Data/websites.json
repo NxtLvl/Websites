@@ -69,7 +69,7 @@
         "en": "Web²",
         "pt": ""
       },
-      "Type": 1,
+      "Type": 2,
       "Bindings": [
         "*/admin"
       ],

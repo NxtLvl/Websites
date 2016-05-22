@@ -1,1749 +1,1128 @@
-// Typing for linq.js, ver 3.0.3-Beta4
-
-declare module linqjs {
-    interface IEnumerator<T> {
-        current(): T;
-        moveNext(): Boolean;
-        dispose(): void;
-    }
-
-    interface EnumerableStatic {
-        Utils: {
-            createLambda<T>(expression: T): (...params: T[]) => T;
-            createEnumerable<T>(getEnumerator: () => IEnumerator<T>): Enumerable<T>;
-            createEnumerator<T>(initialize: () => void, tryGetNext: () => Boolean, dispose: () => void): IEnumerator<T>;
-            extendTo<T>(type: T): void;
-        };
-        choice<T>(...params: T[]): Enumerable<T>;
-        cycle<T>(...params: T[]): Enumerable<T>;
-        empty<T>(): Enumerable<T>;
-        from<T>(): Enumerable<T>;
-        from<T>(obj: Enumerable<T>): Enumerable<T>;
-        from(obj: string): Enumerable<string>;
-        from(obj: number): Enumerable<number>;
-        from<T>(obj: { length: number;[x: number]: T; }): Enumerable<T>;
-        from<T>(obj: T): Enumerable<T>;
-        make<T>(element: T): Enumerable<T>;
-        matches<T>(input: string, pattern: RegExp): Enumerable<T>;
-        matches<T>(input: string, pattern: string, flags?: string): Enumerable<T>;
-        range(start: number, count: number, step?: number): Enumerable<number>;
-        rangeDown(start: number, count: number, step?: number): Enumerable<number>;
-        rangeTo(start: number, to: number, step?: number): Enumerable<number>;
-        repeat<T>(element: T, count?: number): Enumerable<T>;
-        repeatWithFinalize<T>(initializer: () => T, finalizer: (element) => void): Enumerable<T>;
-        generate<T>(func: () => T, count?: number): Enumerable<T>;
-        toInfinity<T>(start?: number, step?: number): Enumerable<T>;
-        toNegativeInfinity<T>(start?: number, step?: number): Enumerable<T>;
-        unfold<T>(seed: T, func: (value: T) => T): Enumerable<T>;
-        defer<T>(enumerableFactory: () => Enumerable<T>): Enumerable<T>;
-    }
-
-    interface Enumerable<T> {
-        constructor(getEnumerator: () => IEnumerator<T>);
-        getEnumerator(): IEnumerator<T>;
-
-        // Extension Methods
-        traverseBreadthFirst(func: (element: T) => Enumerable<T>, resultSelector?: (element: T, nestLevel: number) => T): Enumerable<T>;
-        traverseDepthFirst(func: (element: T) => Enumerable<T>, resultSelector?: (element: T, nestLevel: number) => T): Enumerable<T>;
-        flatten(): Enumerable<T>;
-        pairwise(selector: (prev: T, current: T) => T): Enumerable<T>;
-        scan(func: (prev: T, current: T) => T): Enumerable<T>;
-        scan(seed: T, func: (prev: T, current: T) => T): Enumerable<T>;
-        select<TResult>(selector: (element: T, index: number) => TResult): Enumerable<TResult>;
-        selectMany<TResult>(collectionSelector: (element: T, index: number) => TResult[]): Enumerable<TResult>;
-        selectMany<TResult>(collectionSelector: (element: T, index: number) => Enumerable<TResult>): Enumerable<TResult>;
-        where(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
-        choose(selector: (element: T, index: number) => T): Enumerable<T>;
-        ofType(type: T): Enumerable<T>;
-        zip(second: T[], resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        zip(second: Enumerable<T>, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        zip(second: { length: number;[x: number]: T; }, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        zip(...params: T[]): Enumerable<T>; // last one is selector
-        merge(second: T[], resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        merge(second: Enumerable<T>, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        merge(second: { length: number;[x: number]: T; }, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
-        merge(...params: T[]): Enumerable<T>; // last one is selector
-        join(inner: Enumerable<T>, outerKeySelector: (outer: T) => T, innerKeySelector: (inner: T) => T, resultSelector: (outer: T, inner: T) => T, compareSelector?: (obj: T) => T): Enumerable<T>;
-        groupJoin(inner: Enumerable<T>, outerKeySelector: (outer: T) => T, innerKeySelector: (inner: T) => T, resultSelector: (outer: T, inner: T) => T, compareSelector?: (obj: T) => T): Enumerable<T>;
-        all(predicate: (element: T) => Boolean): Boolean;
-        T(predicate?: (element: T) => Boolean): Boolean;
-        isEmpty(): Boolean;
-        concat(sequences: T[]): Enumerable<T>;
-        insert(index: number, second: T[]): Enumerable<T>;
-        insert(index: number, second: Enumerable<T>): Enumerable<T>;
-        insert(index: number, second: { length: number;[x: number]: T; }): Enumerable<T>;
-        alternate(alternateValue: T): Enumerable<T>;
-        alternate(alternateSequence: T[]): Enumerable<T>;
-        alternate(alternateSequence: Enumerable<T>): Enumerable<T>;
-        contains(value: T, compareSelector: (element: T) => T): Enumerable<T>;
-        defaultIfEmpty(defaultValue?: T): Enumerable<T>;
-        distinct(compareSelector?: (element: T) => T): Enumerable<T>;
-        distinctUntilChanged(compareSelector: (element: T) => T): Enumerable<T>;
-        except(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
-        except(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
-        except(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
-        intersect(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
-        intersect(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
-        intersect(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
-        sequenceEqual(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
-        sequenceEqual(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
-        sequenceEqual(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
-        union(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
-        union(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
-        union(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
-        orderBy<TKey>(keySelector: (element: T) => TKey): OrderedEnumerable<T>;
-        orderByDescending<TKey>(keySelector: (element: T) => TKey): OrderedEnumerable<T>;
-        reverse(): Enumerable<T>;
-        shuffle(): Enumerable<T>;
-        weightedSample(weightSelector: (element: T) => T): Enumerable<T>;
-        groupBy<TKey, TValue>(keySelector: (element: T) => TKey, elementSelector: (element: T) => TValue): Enumerable<Grouping<TKey, TValue>>;
-        partitionBy(keySelector: (element: T) => T, elementSelector?: (element: T) => T, resultSelector?: (key: T, element: T) => T, compareSelector?: (element: T) => T): Enumerable<T>;
-        buffer(count: number): Enumerable<T>;
-        aggregate(func: (prev: T, current: T) => T): T;
-        aggregate(seed: T, func: (prev: T, current: T) => T, resultSelector?: (last: T) => T): T;
-        average(selector?: (element: T) => number): number;
-        count(predicate?: (element: T, index: number) => Boolean): number;
-        max(selector?: (element: T) => number): number;
-        min(selector?: (element: T) => number): number;
-        maxBy(keySelector: (element: T) => T): T;
-        minBy(keySelector: (element: T) => T): T;
-        sum(selector?: (element: T) => number): number;
-        elementAt(index: number): T;
-        elementAtOrDefault(index: number, defaultValue?: T): T;
-        first(predicate?: (element: T, index: number) => Boolean): T;
-        firstOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
-        last(predicate?: (element: T, index: number) => Boolean): T;
-        lastOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
-        single(predicate?: (element: T, index: number) => Boolean): T;
-        singleOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
-        skip(count: number): Enumerable<T>;
-        skipWhile(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
-        take(count: number): Enumerable<T>;
-        takeWhile(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
-        takeExceptLast(count?: number): Enumerable<T>;
-        takeFromLast(count: number): Enumerable<T>;
-        indexOf(item: T): number;
-        indexOf(predicate: (element: T, index: number) => Boolean): number;
-        lastIndexOf(item: T): number;
-        lastIndexOf(predicate: (element: T, index: number) => Boolean): number;
-        asEnumerable(): Enumerable<T>;
-        toArray(): T[];
-        toLookup(keySelector: (element: T) => T, elementSelector?: (element: T) => T, compareSelector?: (element: T) => T): Lookup<T>;
-        toObject(keySelector: (element: T) => T, elementSelector?: (element: T) => T): Object;
-        toDictionary<TKey, TValue>(keySelector: (element: T) => TKey, elementSelector: (element: T) => TValue): Dictionary<TKey, TValue>;
-        toJSONString(replacer: (key: string, value: T) => T): string;
-        toJSONString(replacer: T[]): string;
-        toJSONString(replacer: (key: string, value: T) => T, space: T): string;
-        toJSONString(replacer: T[], space: T): string;
-        toJoinedString(separator?: string, selector?: (element: T, index: number) => T): string;
-        doAction(action: (element: T, index: number) => void): Enumerable<T>;
-        doAction(action: (element: T, index: number) => Boolean): Enumerable<T>;
-        forEach(action: (element: T, index: number) => void): void;
-        forEach(action: (element: T) => void): void;
-        forEach(action: (element: T, index: number) => Boolean): void;
-        forEach(action: (element: T) => Boolean): void;
-        write(separator?: string, selector?: (element: T) => T): void;
-        writeLine(selector?: (element: T) => T): void;
-        force(): void;
-        letBind(func: (source: Enumerable<T>) => T[]): Enumerable<T>;
-        letBind(func: (source: Enumerable<T>) => { length: number;[x: number]: T; }): Enumerable<T>;
-        letBind(func: (source: Enumerable<T>) => Enumerable<T>): Enumerable<T>;
-        share(): DisposableEnumerable<T>;
-        memoize(): DisposableEnumerable<T>;
-        catchError(handler: (exception: T) => void): Enumerable<T>;
-        finallyAction(finallyAction: () => void): Enumerable<T>;
-        log(selector?: (element: T) => void): Enumerable<T>;
-        trace(message?: string, selector?: (element: T) => void): Enumerable<T>;
-    }
-
-    interface OrderedEnumerable<T> extends Enumerable<T> {
-        createOrderedEnumerable(keySelector: (element: T) => T, descending: Boolean): OrderedEnumerable<T>;
-        thenBy(keySelector: (element: T) => T): OrderedEnumerable<T>;
-        thenByDescending(keySelector: (element: T) => T): OrderedEnumerable<T>;
-    }
-
-    interface DisposableEnumerable<T> extends Enumerable<T> {
-        dispose(): void;
-    }
-
-    export class Dictionary<TKey, TValue> {
-        constructor();
-
-        add(key: TKey, value: TValue): void;
-        get(key: TKey): TValue;
-        set(key: TKey, value: TValue): Boolean;
-        contains(key: TKey): Boolean;
-        clear(): void;
-        remove(key: TKey): void;
-        count(): number;
-        toEnumerable(): Enumerable<KeyValuePair<TKey, TValue>>;
-    }
-
-    interface KeyValuePair<TKey, TValue> {
-        key: TKey;
-        value: TValue;
-    }
-
-    interface Lookup<T> {
-        count(): number;
-        get(key: T): Enumerable<T>;
-        contains(key: T): Boolean;
-        toEnumerable(): Enumerable<T>;
-    }
-
-    interface Grouping<TKey, TValue> extends Enumerable<TValue> {
-        key(): TKey;
-    }
-}
-
-// export definition
-declare var Enumerable: linqjs.EnumerableStatic;interface MaskedInputOptions {
-}
-
-declare class MaskedInput {
-	constructor(args: MaskedInputOptions);
-}// Type definitions for Moment.js 2.8.0
-// Project: https://github.com/timrwood/moment
-// Definitions by: Michael Lakerveld <https://github.com/Lakerfield>, Aaron King <https://github.com/kingdango>, Hiroki Horiuchi <https://github.com/horiuchi>, Dick van den Brink <https://github.com/DickvdBrink>, Adi Dahiya <https://github.com/adidahiya>
-// Definitions: https://github.com/borisyankov/DefinitelyTyped
-
-declare module moment {
-
-    interface MomentInput {
-
-        years?: number;
-        y?: number;
-
-        months?: number;
-        M?: number;
-
-        weeks?: number;
-        w?: number;
-
-        days?: number;
-        d?: number;
-
-        hours?: number;
-        h?: number;
-
-        minutes?: number;
-        m?: number;
-
-        seconds?: number;
-        s?: number;
-
-        milliseconds?: number;
-        ms?: number;
-
-    }
-
-    interface Duration {
-
-        humanize(withSuffix?: boolean): string;
-
-        as(units: string): number;
-
-        milliseconds(): number;
-        asMilliseconds(): number;
-
-        seconds(): number;
-        asSeconds(): number;
-
-        minutes(): number;
-        asMinutes(): number;
-
-        hours(): number;
-        asHours(): number;
-
-        days(): number;
-        asDays(): number;
-
-        months(): number;
-        asMonths(): number;
-
-        years(): number;
-        asYears(): number;
-
-        add(n: number, p: string): Duration;
-        add(n: number): Duration;
-        add(d: Duration): Duration;
-
-        subtract(n: number, p: string): Duration;
-        subtract(n: number): Duration;
-        subtract(d: Duration): Duration;
-
-        toISOString(): string;
-
-    }
-
-    interface Moment {
-
-        format(format: string): string;
-        format(): string;
-
-        fromNow(withoutSuffix?: boolean): string;
-
-        startOf(unitOfTime: string): Moment;
-        endOf(unitOfTime: string): Moment;
-
-        /**
-         * Mutates the original moment by adding time. (deprecated in 2.8.0)
-         *
-         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
-         * @param amount the amount you want to add
-         */
-        add(unitOfTime: string, amount: number): Moment;
-        /**
-         * Mutates the original moment by adding time.
-         *
-         * @param amount the amount you want to add
-         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
-         */
-        add(amount: number, unitOfTime: string): Moment;
-        /**
-         * Mutates the original moment by adding time. Note that the order of arguments can be flipped.
-         *
-         * @param amount the amount you want to add
-         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
-         */
-        add(amount: string, unitOfTime: string): Moment;
-        /**
-         * Mutates the original moment by adding time.
-         *
-         * @param objectLiteral an object literal that describes multiple time units {days:7,months:1}
-         */
-        add(objectLiteral: MomentInput): Moment;
-        /**
-         * Mutates the original moment by adding time.
-         *
-         * @param duration a length of time
-         */
-        add(duration: Duration): Moment;
-
-        /**
-         * Mutates the original moment by subtracting time. (deprecated in 2.8.0)
-         *
-         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
-         * @param amount the amount you want to subtract
-         */
-        subtract(unitOfTime: string, amount: number): Moment;
-        /**
-         * Mutates the original moment by subtracting time.
-         *
-         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
-         * @param amount the amount you want to subtract
-         */
-        subtract(amount: number, unitOfTime: string): Moment;
-        /**
-         * Mutates the original moment by subtracting time. Note that the order of arguments can be flipped.
-         *
-         * @param amount the amount you want to add
-         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
-         */
-        subtract(amount: string, unitOfTime: string): Moment;
-        /**
-         * Mutates the original moment by subtracting time.
-         *
-         * @param objectLiteral an object literal that describes multiple time units {days:7,months:1}
-         */
-        subtract(objectLiteral: MomentInput): Moment;
-        /**
-         * Mutates the original moment by subtracting time.
-         *
-         * @param duration a length of time
-         */
-        subtract(duration: Duration): Moment;
-
-        calendar(): string;
-        calendar(start: Moment): string;
-
-        clone(): Moment;
-
-        /**
-         * @return Unix timestamp, or milliseconds since the epoch.
-         */
-        valueOf(): number;
-
-        local(): Moment; // current date/time in local mode
-
-        utc(): Moment; // current date/time in UTC mode
-
-        isValid(): boolean;
-
-        year(y: number): Moment;
-        year(): number;
-        quarter(): number;
-        quarter(q: number): Moment;
-        month(M: number): Moment;
-        month(M: string): Moment;
-        month(): number;
-        day(d: number): Moment;
-        day(d: string): Moment;
-        day(): number;
-        date(d: number): Moment;
-        date(): number;
-        hour(h: number): Moment;
-        hour(): number;
-        hours(h: number): Moment;
-        hours(): number;
-        minute(m: number): Moment;
-        minute(): number;
-        minutes(m: number): Moment;
-        minutes(): number;
-        second(s: number): Moment;
-        second(): number;
-        seconds(s: number): Moment;
-        seconds(): number;
-        millisecond(ms: number): Moment;
-        millisecond(): number;
-        milliseconds(ms: number): Moment;
-        milliseconds(): number;
-        weekday(): number;
-        weekday(d: number): Moment;
-        isoWeekday(): number;
-        isoWeekday(d: number): Moment;
-        weekYear(): number;
-        weekYear(d: number): Moment;
-        isoWeekYear(): number;
-        isoWeekYear(d: number): Moment;
-        week(): number;
-        week(d: number): Moment;
-        weeks(): number;
-        weeks(d: number): Moment;
-        isoWeek(): number;
-        isoWeek(d: number): Moment;
-        isoWeeks(): number;
-        isoWeeks(d: number): Moment;
-        weeksInYear(): number;
-        isoWeeksInYear(): number;
-        dayOfYear(): number;
-        dayOfYear(d: number): Moment;
-
-        from(f: Moment): string;
-        from(f: Moment, suffix: boolean): string;
-        from(d: Date): string;
-        from(s: string): string;
-        from(date: number[]): string;
-
-        diff(b: Moment): number;
-        diff(b: Moment, unitOfTime: string): number;
-        diff(b: Moment, unitOfTime: string, round: boolean): number;
-
-        toArray(): number[];
-        toDate(): Date;
-        toISOString(): string;
-        toJSON(): string;
-        unix(): number;
-
-        isLeapYear(): boolean;
-        zone(): number;
-        zone(b: number): Moment;
-        zone(b: string): Moment;
-        daysInMonth(): number;
-        isDST(): boolean;
-
-        isBefore(): boolean;
-        isBefore(b: Moment): boolean;
-        isBefore(b: string): boolean;
-        isBefore(b: Number): boolean;
-        isBefore(b: Date): boolean;
-        isBefore(b: number[]): boolean;
-        isBefore(b: Moment, granularity: string): boolean;
-        isBefore(b: String, granularity: string): boolean;
-        isBefore(b: Number, granularity: string): boolean;
-        isBefore(b: Date, granularity: string): boolean;
-        isBefore(b: number[], granularity: string): boolean;
-
-        isAfter(): boolean;
-        isAfter(b: Moment): boolean;
-        isAfter(b: string): boolean;
-        isAfter(b: Number): boolean;
-        isAfter(b: Date): boolean;
-        isAfter(b: number[]): boolean;
-        isAfter(b: Moment, granularity: string): boolean;
-        isAfter(b: String, granularity: string): boolean;
-        isAfter(b: Number, granularity: string): boolean;
-        isAfter(b: Date, granularity: string): boolean;
-        isAfter(b: number[], granularity: string): boolean;
-
-        isSame(b: Moment): boolean;
-        isSame(b: string): boolean;
-        isSame(b: Number): boolean;
-        isSame(b: Date): boolean;
-        isSame(b: number[]): boolean;
-        isSame(b: Moment, granularity: string): boolean;
-        isSame(b: String, granularity: string): boolean;
-        isSame(b: Number, granularity: string): boolean;
-        isSame(b: Date, granularity: string): boolean;
-        isSame(b: number[], granularity: string): boolean;
-
-        // Deprecated as of 2.8.0.
-        lang(language: string): Moment;
-        lang(reset: boolean): Moment;
-        lang(): MomentLanguage;
-
-        locale(language: string): Moment;
-        locale(reset: boolean): Moment;
-        locale(): string;
-
-        localeData(language: string): Moment;
-        localeData(reset: boolean): Moment;
-        localeData(): MomentLanguage;
-
-        // Deprecated as of 2.7.0.
-        max(date: Date): Moment;
-        max(date: number): Moment;
-        max(date: any[]): Moment;
-        max(date: string): Moment;
-        max(date: string, format: string): Moment;
-        max(clone: Moment): Moment;
-
-        // Deprecated as of 2.7.0.
-        min(date: Date): Moment;
-        min(date: number): Moment;
-        min(date: any[]): Moment;
-        min(date: string): Moment;
-        min(date: string, format: string): Moment;
-        min(clone: Moment): Moment;
-
-        get(unit: string): number;
-        set(unit: string, value: number): Moment;
-
-    }
-
-    interface MomentCalendar {
-
-		lastDay: any;
-		sameDay: any;
-		nextDay: any;
-		lastWeek: any;
-		nextWeek: any;
-		sameElse: any;
-
-    }
-
-    interface MomentLanguage {
-
-		months?: any;
-		monthsShort?: any;
-		weekdays?: any;
-		weekdaysShort?: any;
-		weekdaysMin?: any;
-		longDateFormat?: MomentLongDateFormat;
-		relativeTime?: MomentRelativeTime;
-		meridiem?: (hour: number, minute: number, isLowercase: boolean) => string;
-		calendar?: MomentCalendar;
-		ordinal?: (num: number) => string;
-
-    }
-
-    interface MomentLongDateFormat {
-
-		L: string;
-		LL: string;
-		LLL: string;
-		LLLL: string;
-		LT: string;
-		l?: string;
-		ll?: string;
-		lll?: string;
-		llll?: string;
-		lt?: string;
-
-    }
-
-    interface MomentRelativeTime {
-
-		future: any;
-		past: any;
-		s: any;
-		m: any;
-		mm: any;
-		h: any;
-		hh: any;
-		d: any;
-		dd: any;
-		M: any;
-		MM: any;
-		y: any;
-		yy: any;
-
-    }
-
-    interface MomentStatic {
-
-        version: string;
-
-        (): Moment;
-        (date: number): Moment;
-        (date: number[]): Moment;
-        (date: string, format?: string, strict?: boolean): Moment;
-        (date: string, format?: string, language?: string, strict?: boolean): Moment;
-        (date: string, formats: string[], strict?: boolean): Moment;
-        (date: string, formats: string[], language?: string, strict?: boolean): Moment;
-        (date: string, specialFormat: () => void, strict?: boolean): Moment;
-        (date: string, specialFormat: () => void, language?: string, strict?: boolean): Moment;
-        (date: string, formatsIncludingSpecial: any[], strict?: boolean): Moment;
-        (date: string, formatsIncludingSpecial: any[], language?: string, strict?: boolean): Moment;
-        (date: Date): Moment;
-        (date: Moment): Moment;
-        (date: Object): Moment;
-
-        utc(): Moment;
-        utc(date: number): Moment;
-        utc(date: number[]): Moment;
-        utc(date: string, format?: string, strict?: boolean): Moment;
-        utc(date: string, format?: string, language?: string, strict?: boolean): Moment;
-        utc(date: string, formats: string[], strict?: boolean): Moment;
-        utc(date: string, formats: string[], language?: string, strict?: boolean): Moment;
-        utc(date: Date): Moment;
-        utc(date: Moment): Moment;
-        utc(date: Object): Moment;
-
-        unix(timestamp: number): Moment;
-
-        invalid(parsingFlags?: Object): Moment;
-        isMoment(): boolean;
-        isMoment(m: any): boolean;
-        isDuration(): boolean;
-        isDuration(d: any): boolean;
-
-        // Deprecated in 2.8.0.
-        lang(language?: string): string;
-        lang(language?: string, definition?: MomentLanguage): string;
-
-        locale(language?: string): string;
-        locale(language?: string[]): string;
-        locale(language?: string, definition?: MomentLanguage): string;
-
-        localeData(language?: string): MomentLanguage;
-
-        longDateFormat: any;
-        relativeTime: any;
-        meridiem: (hour: number, minute: number, isLowercase: boolean) => string;
-        calendar: any;
-        ordinal: (num: number) => string;
-
-        duration(milliseconds: Number): Duration;
-        duration(num: Number, unitOfTime: string): Duration;
-        duration(input: MomentInput): Duration;
-        duration(object: any): Duration;
-        duration(): Duration;
-
-        parseZone(date: string): Moment;
-
-        months(): string[];
-        months(index: number): string;
-        months(format: string): string[];
-        months(format: string, index: number): string;
-        monthsShort(): string[];
-        monthsShort(index: number): string;
-        monthsShort(format: string): string[];
-        monthsShort(format: string, index: number): string;
-
-        weekdays(): string[];
-        weekdays(index: number): string;
-        weekdays(format: string): string[];
-        weekdays(format: string, index: number): string;
-        weekdaysShort(): string[];
-        weekdaysShort(index: number): string;
-        weekdaysShort(format: string): string[];
-        weekdaysShort(format: string, index: number): string;
-        weekdaysMin(): string[];
-        weekdaysMin(index: number): string;
-        weekdaysMin(format: string): string[];
-        weekdaysMin(format: string, index: number): string;
-
-        min(moments: Moment[]): Moment;
-        max(moments: Moment[]): Moment;
-
-        normalizeUnits(unit: string): string;
-        relativeTimeThreshold(threshold: string, limit: number): void;
-
-        /**
-         * Constant used to enable explicit ISO_8601 format parsing.
-         */
-        ISO_8601(): void;
-
-    }
-
-}
-
-declare var moment: moment.MomentStatic;
-
-declare module 'moment' {
-    export = moment;
-}declare module Vidyano {
-    export interface Route {
-        enter(fnc: Function): Route;
-        to(fnc: Function): Route;
-        exit(fnc: Function): Route;
-        params: any;
-        path: string;
-    }
-
-    export interface PathRescueArguments {
-        current: string;
-    }
-
-    export interface PathArguments {
-        path: string;
-        params: { [key: string]: string };
-    }
-
-    export interface PathStatic {
-        map(path: string): Route;
-        root(path: string): void;
-        routes: {
-            current: string;
-            defined: {
-                [key: string]: Route
-            };
-        };
-        listen(): void;
-        rescue(fnc: Function): void;
-        history: {
-            pushState(state: any, title: string, path: string);
-            replaceState(state: any, title: string, path: string);
-            listen();
-        };
-        match(path: string, parameterize: boolean): Route;
-    }
-
-    export var Path: PathStatic;
-}interface PolymerProperty {
-    type: ObjectConstructor | StringConstructor | BooleanConstructor | DateConstructor | NumberConstructor | ArrayConstructor;
-    computed?: string;
-    reflectToAttribute?: boolean;
-    readOnly?: boolean;
-    observer?: string;
-    value?: number | boolean | string | Function;
-    notify?: boolean;
-}
-
-interface PolymerProperties {
-    [name: string]: ObjectConstructor | StringConstructor | BooleanConstructor | DateConstructor | NumberConstructor | ArrayConstructor | PolymerProperty;
-}
-
-interface PolymerDomApiClassList {
-    add(className: string): void;
-    remove(className: string): void;
-    toggle(className: string): void;
-}
-
-interface PolymerDomApi {
-    getDistributedNodes(): HTMLElement[];
-    getDestinationInsertionPoints(): HTMLElement[];
-    flush(): void;
-    childNodes: Node[];
-    children: HTMLElement[];
-    classList: PolymerDomApiClassList;
-    firstChild: Node;
-    firstElementChild: Element;
-    innerHTML: string;
-    lastChild: Node;
-    lastElementChild: Element;
-    nextElementSibling: Element;
-    nextSibling: Node;
-    node: Node;
-    parentNode: Node;
-    previousElementSibling: Element;
-    previousSibling: Node;
-    textContent: string;
-    insertBefore(newChild: Node | Vidyano.WebComponents.WebComponent, refChild?: Node | Vidyano.WebComponents.WebComponent): Node;
-    removeAttribute(name?: string): void;
-    setAttribute(name?: string, value?: string): void;
-    querySelector(selectors: string): Node | HTMLElement | Vidyano.WebComponents.WebComponent;
-    querySelectorAll(selectors: string): NodeList;
-    appendChild(newChild: Node | Vidyano.WebComponents.WebComponent): Node | Vidyano.WebComponents.WebComponent;
-    removeChild(oldChild: Node | Vidyano.WebComponents.WebComponent): Node | Vidyano.WebComponents.WebComponent;
-    replaceChild(newChild: Node | Vidyano.WebComponents.WebComponent, oldChild: Node | Vidyano.WebComponents.WebComponent): Node;
-    getEffectiveChildNodes(): Node[];
-    observeNodes(callBack: (info: PolymerDomChangedInfo) => void): PolymerDomChangeObserver;
-    unobserveNodes(observer: PolymerDomChangeObserver);
-}
-
-interface PolymerDomChangedInfo {
-    addedNodes: Node;
-    removedNodes: Node;
-}
-
-interface PolymerDomChangeObserver {
-}
-
-interface PolymerTrackEvent extends CustomEvent {
-    detail: {
-        sourceEvent?: Event;
-    }
-}
-
-interface PolymerTrackDetail {
-    /**
-    state - a string indicating the tracking state:
-        - start - fired when tracking is first detected (finger/button down and moved past a pre-set distance threshold)
-        - track - fired while tracking
-        - end - fired when tracking ends
-    */
-    state: string;
-    /** clientX coordinate for event */
-    x: number;
-    /** clientY coordinate for event */
-    y: number;
-    /** change in pixels horizontally since the first track event */
-    dx: number;
-    /** change in pixels vertically since the first track event */
-    dy: number;
-    /** change in pixels horizontally since last track event */
-    ddx: number;
-    /** change in pixels vertically since last track event */
-    ddy: number;
-    /** a function that may be called to determine the element currently being hovered */
-    hover(): Element | Vidyano.WebComponents.WebComponent;
-}
-
-interface PolymerTemplate extends Node {
-    stamp: (model: any) => TemplateInstance;
-}
-
-interface TemplateInstance {
-    item: any;
-    index: number;
-    root: DocumentFragment;
-}
-
-interface TapEvent extends CustomEvent {
-    detail: {
-        x: number;
-        y: number;
-        sourceEvent: Event;
-    };
-
-    model?: TemplateInstance | any;
-}
-
-interface PolymerGestures {
-    add: (node: HTMLElement, eventName: string, handler: Function) => void;
-    remove: (node: HTMLElement, eventName: string, handler: Function) => void;
-}
-
-declare var Polymer: {
-    (polymer: any): void;
-    dom(element: Node | Vidyano.WebComponents.WebComponent): PolymerDomApi;
-    getRegisteredPrototype(tagName: string): any;
-
-    /**
-     * Returns true if the element is a Polymer web component.
-     */
-    isInstance(element: HTMLElement): boolean;
-
-    whenReady(callback: () => void): void;
-
-    /**
-     * no-operation function for handy stubs
-     */
-    nop(): void;
-
-    api: any;
-
-    Gestures: PolymerGestures;
-};
-declare var CustomElements: {
-    registry: {
-        [tag: string]: {
-            ctor: any;
-        }
-    }
-
-    ready: boolean;
-    useNative: boolean;
-};
-declare class Queue {
-    constructor(maxConcurrentPromises: number, maxQueuedPromises?: number);
-    add<T>(work: () => Promise<T>): Promise<T>;
-    getQueueLength(): number;
-}
-// Type definitions for QUnit v1.16
-// Project: http://qunitjs.com/
-// Definitions by: Diullei Gomes <https://github.com/diullei>
+// Type definitions for CodeMirror
+// Project: https://github.com/marijnh/CodeMirror
+// Definitions by: mihailik <https://github.com/mihailik>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+declare function CodeMirror(host: HTMLElement, options?: CodeMirror.EditorConfiguration): CodeMirror.Editor;
+declare function CodeMirror(callback: (host: HTMLElement) => void , options?: CodeMirror.EditorConfiguration): CodeMirror.Editor;
 
-interface DoneCallbackObject {
+declare namespace CodeMirror {
+    export var Doc : CodeMirror.DocConstructor;
+    export var Pos: CodeMirror.PositionConstructor;
+    export var Pass: any;
+
+    function fromTextArea(host: HTMLTextAreaElement, options?: EditorConfiguration): CodeMirror.EditorFromTextArea;
+
+    var version: string;
+
+    /** If you want to define extra methods in terms of the CodeMirror API, it is possible to use defineExtension.
+    This will cause the given value(usually a method) to be added to all CodeMirror instances created from then on. */
+    function defineExtension(name: string, value: any): void;
+
+    /** Like defineExtension, but the method will be added to the interface for Doc objects instead. */
+    function defineDocExtension(name: string, value: any): void;
+
+    /** Similarly, defineOption can be used to define new options for CodeMirror.
+    The updateFunc will be called with the editor instance and the new value when an editor is initialized,
+    and whenever the option is modified through setOption. */
+    function defineOption(name: string, default_: any, updateFunc: Function): void;
+
+    /** If your extention just needs to run some code whenever a CodeMirror instance is initialized, use CodeMirror.defineInitHook.
+    Give it a function as its only argument, and from then on, that function will be called (with the instance as argument)
+    whenever a new CodeMirror instance is initialized. */
+    function defineInitHook(func: Function): void;
+
+    /** Registers a helper value with the given name in the given namespace (type). This is used to define functionality
+    that may be looked up by mode. Will create (if it doesn't already exist) a property on the CodeMirror object for
+    the given type, pointing to an object that maps names to values. I.e. after doing
+    CodeMirror.registerHelper("hint", "foo", myFoo), the value CodeMirror.hint.foo will point to myFoo. */
+    function registerHelper(namespace: string, name: string, helper: any): void;
+
+
+    function on(element: any, eventName: string, handler: Function): void;
+    function off(element: any, eventName: string, handler: Function): void;
+
+    /** Fired whenever a change occurs to the document. changeObj has a similar type as the object passed to the editor's "change" event,
+    but it never has a next property, because document change events are not batched (whereas editor change events are). */
+    function on(doc: Doc, eventName: 'change', handler: (instance: Doc, change: EditorChange) => void ): void;
+    function off(doc: Doc, eventName: 'change', handler: (instance: Doc, change: EditorChange) => void ): void;
+
+    /** See the description of the same event on editor instances. */
+    function on(doc: Doc, eventName: 'beforeChange', handler: (instance: Doc, change: EditorChangeCancellable) => void ): void;
+    function off(doc: Doc, eventName: 'beforeChange', handler: (instance: Doc, change: EditorChangeCancellable) => void ): void;
+
+    /** Fired whenever the cursor or selection in this document changes. */
+    function on(doc: Doc, eventName: 'cursorActivity', handler: (instance: CodeMirror.Editor) => void ): void;
+    function off(doc: Doc, eventName: 'cursorActivity', handler: (instance: CodeMirror.Editor) => void ): void;
+
+    /** Equivalent to the event by the same name as fired on editor instances. */
+    function on(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: Position; anchor: Position; }) => void ): void;
+    function off(doc: Doc, eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: Position; anchor: Position; }) => void ): void;
+
+    /** Will be fired when the line object is deleted. A line object is associated with the start of the line.
+    Mostly useful when you need to find out when your gutter markers on a given line are removed. */
+    function on(line: LineHandle, eventName: 'delete', handler: () => void ): void;
+    function off(line: LineHandle, eventName: 'delete', handler: () => void ): void;
+
+    /** Fires when the line's text content is changed in any way (but the line is not deleted outright).
+    The change object is similar to the one passed to change event on the editor object. */
+    function on(line: LineHandle, eventName: 'change', handler: (line: LineHandle, change: EditorChange) => void ): void;
+    function off(line: LineHandle, eventName: 'change', handler: (line: LineHandle, change: EditorChange) => void ): void;
+
+    /** Fired when the cursor enters the marked range. From this event handler, the editor state may be inspected but not modified,
+    with the exception that the range on which the event fires may be cleared. */
+    function on(marker: TextMarker, eventName: 'beforeCursorEnter', handler: () => void ): void;
+    function off(marker: TextMarker, eventName: 'beforeCursorEnter', handler: () => void ): void;
+
+    /** Fired when the range is cleared, either through cursor movement in combination with clearOnEnter or through a call to its clear() method.
+    Will only be fired once per handle. Note that deleting the range through text editing does not fire this event,
+    because an undo action might bring the range back into existence. */
+    function on(marker: TextMarker, eventName: 'clear', handler: () => void ): void;
+    function off(marker: TextMarker, eventName: 'clear', handler: () => void ): void;
+
+    /** Fired when the last part of the marker is removed from the document by editing operations. */
+    function on(marker: TextMarker, eventName: 'hide', handler: () => void ): void;
+    function off(marker: TextMarker, eventName: 'hide', handler: () => void ): void;
+
+    /** Fired when, after the marker was removed by editing, a undo operation brought the marker back. */
+    function on(marker: TextMarker, eventName: 'unhide', handler: () => void ): void;
+    function off(marker: TextMarker, eventName: 'unhide', handler: () => void ): void;
+
+    /** Fired whenever the editor re-adds the widget to the DOM. This will happen once right after the widget is added (if it is scrolled into view),
+    and then again whenever it is scrolled out of view and back in again, or when changes to the editor options
+    or the line the widget is on require the widget to be redrawn. */
+    function on(line: LineWidget, eventName: 'redraw', handler: () => void ): void;
+    function off(line: LineWidget, eventName: 'redraw', handler: () => void ): void;
+
+    /** Various CodeMirror-related objects emit events, which allow client code to react to various situations.
+    Handlers for such events can be registered with the on and off methods on the objects that the event fires on.
+    To fire your own events, use CodeMirror.signal(target, name, args...), where target is a non-DOM-node object. */
+    function signal(target: any, name: string, ...args: any[]): void;
+
+    interface Editor {
+
+        /** Tells you whether the editor currently has focus. */
+        hasFocus(): boolean;
+
+        /** Used to find the target position for horizontal cursor motion.start is a { line , ch } object,
+        amount an integer(may be negative), and unit one of the string "char", "column", or "word".
+        Will return a position that is produced by moving amount times the distance specified by unit.
+        When visually is true , motion in right - to - left text will be visual rather than logical.
+        When the motion was clipped by hitting the end or start of the document, the returned value will have a hitSide property set to true. */
+        findPosH(start: CodeMirror.Position, amount: number, unit: string, visually: boolean): { line: number; ch: number; hitSide?: boolean; };
+
+        /** Similar to findPosH , but used for vertical motion.unit may be "line" or "page".
+        The other arguments and the returned value have the same interpretation as they have in findPosH. */
+        findPosV(start: CodeMirror.Position, amount: number, unit: string): { line: number; ch: number; hitSide?: boolean; };
+
+
+        /** Change the configuration of the editor. option should the name of an option, and value should be a valid value for that option. */
+        setOption(option: string, value: any): void;
+
+        /** Retrieves the current value of the given option for this editor instance. */
+        getOption(option: string): any;
+
+        /** Attach an additional keymap to the editor.
+        This is mostly useful for add - ons that need to register some key handlers without trampling on the extraKeys option.
+        Maps added in this way have a higher precedence than the extraKeys and keyMap options, and between them,
+        the maps added earlier have a lower precedence than those added later, unless the bottom argument was passed,
+        in which case they end up below other keymaps added with this method. */
+        addKeyMap(map: any, bottom?: boolean): void;
+
+        /** Disable a keymap added with addKeyMap.Either pass in the keymap object itself , or a string,
+        which will be compared against the name property of the active keymaps. */
+        removeKeyMap(map: any): void;
+
+        /** Enable a highlighting overlay.This is a stateless mini - mode that can be used to add extra highlighting.
+        For example, the search add - on uses it to highlight the term that's currently being searched.
+        mode can be a mode spec or a mode object (an object with a token method). The options parameter is optional. If given, it should be an object.
+        Currently, only the opaque option is recognized. This defaults to off, but can be given to allow the overlay styling, when not null,
+        to override the styling of the base mode entirely, instead of the two being applied together. */
+        addOverlay(mode: any, options?: any): void;
+
+        /** Pass this the exact argument passed for the mode parameter to addOverlay to remove an overlay again. */
+        removeOverlay(mode: any): void;
+
+
+        /** Retrieve the currently active document from an editor. */
+        getDoc(): CodeMirror.Doc;
+
+        /** Attach a new document to the editor. Returns the old document, which is now no longer associated with an editor. */
+        swapDoc(doc: CodeMirror.Doc): CodeMirror.Doc;
+
+        /** Get the content of the current editor document. You can pass it an optional argument to specify the string to be used to separate lines (defaults to "\n"). */
+        getValue(seperator?: string): string;
+
+        /** Set the content of the current editor document. */
+        setValue(content: string): void;
+
+        /** Sets the gutter marker for the given gutter (identified by its CSS class, see the gutters option) to the given value.
+        Value can be either null, to clear the marker, or a DOM element, to set it. The DOM element will be shown in the specified gutter next to the specified line. */
+        setGutterMarker(line: any, gutterID: string, value: HTMLElement): CodeMirror.LineHandle;
+
+        /** Remove all gutter markers in the gutter with the given ID. */
+        clearGutter(gutterID: string): void;
+
+        /** Set a CSS class name for the given line.line can be a number or a line handle.
+        where determines to which element this class should be applied, can can be one of "text" (the text element, which lies in front of the selection),
+        "background"(a background element that will be behind the selection),
+        or "wrap" (the wrapper node that wraps all of the line's elements, including gutter elements).
+        class should be the name of the class to apply. */
+        addLineClass(line: any, where: string, _class_: string): CodeMirror.LineHandle;
+
+        /** Remove a CSS class from a line.line can be a line handle or number.
+        where should be one of "text", "background", or "wrap"(see addLineClass).
+        class can be left off to remove all classes for the specified node, or be a string to remove only a specific class. */
+        removeLineClass(line: any, where: string, class_: string): CodeMirror.LineHandle;
+
+        /** Returns the line number, text content, and marker status of the given line, which can be either a number or a line handle. */
+        lineInfo(line: any): {
+            line: any;
+            handle: any;
+            text: string;
+            /** Object mapping gutter IDs to marker elements. */
+            gutterMarks: any;
+            textClass: string;
+            bgClass: string;
+            wrapClass: string;
+            /** Array of line widgets attached to this line. */
+            widgets: any;
+        };
+
+        /** Puts node, which should be an absolutely positioned DOM node, into the editor, positioned right below the given { line , ch } position.
+        When scrollIntoView is true, the editor will ensure that the entire node is visible (if possible).
+        To remove the widget again, simply use DOM methods (move it somewhere else, or call removeChild on its parent). */
+        addWidget(pos: CodeMirror.Position, node: HTMLElement, scrollIntoView: boolean): void;
+
+        /** Adds a line widget, an element shown below a line, spanning the whole of the editor's width, and moving the lines below it downwards.
+        line should be either an integer or a line handle, and node should be a DOM node, which will be displayed below the given line.
+        options, when given, should be an object that configures the behavior of the widget.
+        Note that the widget node will become a descendant of nodes with CodeMirror-specific CSS classes, and those classes might in some cases affect it. */
+        addLineWidget(line: any, node: HTMLElement, options?: {
+            /** Whether the widget should cover the gutter. */
+            coverGutter: boolean;
+            /** Whether the widget should stay fixed in the face of horizontal scrolling. */
+            noHScroll: boolean;
+            /** Causes the widget to be placed above instead of below the text of the line. */
+            above: boolean;
+            /** When true, will cause the widget to be rendered even if the line it is associated with is hidden. */
+            showIfHidden: boolean;
+        }): CodeMirror.LineWidget;
+
+
+        /** Programatically set the size of the editor (overriding the applicable CSS rules).
+        width and height height can be either numbers(interpreted as pixels) or CSS units ("100%", for example).
+        You can pass null for either of them to indicate that that dimension should not be changed. */
+        setSize(width: any, height: any): void;
+
+        /** Scroll the editor to a given(pixel) position.Both arguments may be left as null or undefined to have no effect. */
+        scrollTo(x: number, y: number): void;
+
+        /** Get an { left , top , width , height , clientWidth , clientHeight } object that represents the current scroll position, the size of the scrollable area,
+        and the size of the visible area(minus scrollbars). */
+        getScrollInfo(): {
+            left: any;
+            top: any;
+            width: any;
+            height: any;
+            clientWidth: any;
+            clientHeight: any;
+        }
+
+        /** Scrolls the given element into view. pos is a { line , ch } position, referring to a given character, null, to refer to the cursor.
+        The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
+        scrollIntoView(pos: CodeMirror.Position, margin?: number): void;
+
+        /** Scrolls the given element into view. pos is a { left , top , right , bottom } object, in editor-local coordinates.
+        The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
+        scrollIntoView(pos: { left: number; top: number; right: number; bottom: number; }, margin: number): void;
+
+        /** Scrolls the given element into view. pos is a { line, ch } object, in editor-local coordinates.
+        The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
+        scrollIntoView(pos: { line: number, ch: number }, margin?: number): void;
+
+        /** Scrolls the given element into view. pos is a { from, to } object, in editor-local coordinates.
+        The margin parameter is optional. When given, it indicates the amount of pixels around the given area that should be made visible as well. */
+        scrollIntoView(pos: { from: CodeMirror.Position, to: CodeMirror.Position }, margin: number): void;
+
+        /** Returns an { left , top , bottom } object containing the coordinates of the cursor position.
+        If mode is "local" , they will be relative to the top-left corner of the editable document.
+        If it is "page" or not given, they are relative to the top-left corner of the page.
+        where is a boolean indicating whether you want the start(true) or the end(false) of the selection. */
+        cursorCoords(where: boolean, mode: string): { left: number; top: number; bottom: number; };
+
+        /** Returns an { left , top , bottom } object containing the coordinates of the cursor position.
+        If mode is "local" , they will be relative to the top-left corner of the editable document.
+        If it is "page" or not given, they are relative to the top-left corner of the page.
+        where specifies the precise position at which you want to measure. */
+        cursorCoords(where: CodeMirror.Position, mode: string): { left: number; top: number; bottom: number; };
+
+        /** Returns the position and dimensions of an arbitrary character.pos should be a { line , ch } object.
+        This differs from cursorCoords in that it'll give the size of the whole character,
+        rather than just the position that the cursor would have when it would sit at that position. */
+        charCoords(pos: CodeMirror.Position, mode: string): { left: number; right: number; top: number; bottom: number; };
+
+        /** Given an { left , top } object , returns the { line , ch } position that corresponds to it.
+        The optional mode parameter determines relative to what the coordinates are interpreted. It may be "window" , "page"(the default) , or "local". */
+        coordsChar(object: { left: number; top: number; }, mode?: string): CodeMirror.Position;
+
+        /** Returns the line height of the default font for the editor. */
+        defaultTextHeight(): number;
+
+        /** Returns the pixel width of an 'x' in the default font for the editor.
+        (Note that for non - monospace fonts , this is mostly useless, and even for monospace fonts, non - ascii characters might have a different width). */
+        defaultCharWidth(): number;
+
+        /** Returns a { from , to } object indicating the start (inclusive) and end (exclusive) of the currently rendered part of the document.
+        In big documents, when most content is scrolled out of view, CodeMirror will only render the visible part, and a margin around it.
+        See also the viewportChange event. */
+        getViewport(): { from: number; to: number };
+
+        /** If your code does something to change the size of the editor element (window resizes are already listened for), or unhides it,
+        you should probably follow up by calling this method to ensure CodeMirror is still looking as intended. */
+        refresh(): void;
+
+
+        /** Retrieves information about the token the current mode found before the given position (a {line, ch} object). */
+        getTokenAt(pos: CodeMirror.Position): {
+            /** The character(on the given line) at which the token starts. */
+            start: number;
+            /** The character at which the token ends. */
+            end: number;
+            /** The token's string. */
+            string: string;
+            /** The token type the mode assigned to the token, such as "keyword" or "comment" (may also be null). */
+            type: string;
+            /** The mode's state at the end of this token. */
+            state: any;
+        };
+
+        /** Returns the mode's parser state, if any, at the end of the given line number.
+        If no line number is given, the state at the end of the document is returned.
+        This can be useful for storing parsing errors in the state, or getting other kinds of contextual information for a line. */
+        getStateAfter(line?: number): any;
+
+        /** CodeMirror internally buffers changes and only updates its DOM structure after it has finished performing some operation.
+        If you need to perform a lot of operations on a CodeMirror instance, you can call this method with a function argument.
+        It will call the function, buffering up all changes, and only doing the expensive update after the function returns.
+        This can be a lot faster. The return value from this method will be the return value of your function. */
+        operation<T>(fn: ()=> T): T;
+
+        /** Adjust the indentation of the given line.
+        The second argument (which defaults to "smart") may be one of:
+        "prev" Base indentation on the indentation of the previous line.
+        "smart" Use the mode's smart indentation if available, behave like "prev" otherwise.
+        "add" Increase the indentation of the line by one indent unit.
+        "subtract" Reduce the indentation of the line. */
+        indentLine(line: number, dir?: string): void;
+
+
+        /** Give the editor focus. */
+        focus(): void;
+
+        /** Returns the hidden textarea used to read input. */
+        getInputField(): HTMLTextAreaElement;
+
+        /** Returns the DOM node that represents the editor, and controls its size. Remove this from your tree to delete an editor instance. */
+        getWrapperElement(): HTMLElement;
+
+        /** Returns the DOM node that is responsible for the scrolling of the editor. */
+        getScrollerElement(): HTMLElement;
+
+        /** Fetches the DOM node that contains the editor gutters. */
+        getGutterElement(): HTMLElement;
+
+
+
+        /** Events are registered with the on method (and removed with the off method).
+        These are the events that fire on the instance object. The name of the event is followed by the arguments that will be passed to the handler.
+        The instance argument always refers to the editor instance. */
+        on(eventName: string, handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: string, handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** Fires every time the content of the editor is changed. */
+        on(eventName: 'change', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => void ): void;
+        off(eventName: 'change', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList) => void ): void;
+
+        /** Like the "change" event, but batched per operation, passing an
+         * array containing all the changes that happened in the operation.
+         * This event is fired after the operation finished, and display
+         * changes it makes will trigger a new operation. */
+        on(eventName: 'changes', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList[]) => void ): void;
+        off(eventName: 'changes', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList[]) => void ): void;
+
+        /** This event is fired before a change is applied, and its handler may choose to modify or cancel the change.
+        The changeObj never has a next property, since this is fired for each individual change, and not batched per operation.
+        Note: you may not do anything from a "beforeChange" handler that would cause changes to the document or its visualization.
+        Doing so will, since this handler is called directly from the bowels of the CodeMirror implementation,
+        probably cause the editor to become corrupted. */
+        on(eventName: 'beforeChange', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => void ): void;
+        off(eventName: 'beforeChange', handler: (instance: CodeMirror.Editor, change: CodeMirror.EditorChangeCancellable) => void ): void;
+
+        /** Will be fired when the cursor or selection moves, or any change is made to the editor content. */
+        on(eventName: 'cursorActivity', handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: 'cursorActivity', handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** This event is fired before the selection is moved. Its handler may modify the resulting selection head and anchor.
+        Handlers for this event have the same restriction as "beforeChange" handlers � they should not do anything to directly update the state of the editor. */
+        on(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: CodeMirror.Position; anchor: CodeMirror.Position; }) => void ): void;
+        off(eventName: 'beforeSelectionChange', handler: (instance: CodeMirror.Editor, selection: { head: CodeMirror.Position; anchor: CodeMirror.Position; }) => void ): void;
+
+        /** Fires whenever the view port of the editor changes (due to scrolling, editing, or any other factor).
+        The from and to arguments give the new start and end of the viewport. */
+        on(eventName: 'viewportChange', handler: (instance: CodeMirror.Editor, from: number, to: number) => void ): void;
+        off(eventName: 'viewportChange', handler: (instance: CodeMirror.Editor, from: number, to: number) => void ): void;
+
+        /** Fires when the editor gutter (the line-number area) is clicked. Will pass the editor instance as first argument,
+        the (zero-based) number of the line that was clicked as second argument, the CSS class of the gutter that was clicked as third argument,
+        and the raw mousedown event object as fourth argument. */
+        on(eventName: 'gutterClick', handler: (instance: CodeMirror.Editor, line: number, gutter: string, clickEvent: Event) => void ): void;
+        off(eventName: 'gutterClick', handler: (instance: CodeMirror.Editor, line: number, gutter: string, clickEvent: Event) => void ): void;
+
+        /** Fires whenever the editor is focused. */
+        on(eventName: 'focus', handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: 'focus', handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** Fires whenever the editor is unfocused. */
+        on(eventName: 'blur', handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: 'blur', handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** Fires when the editor is scrolled. */
+        on(eventName: 'scroll', handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: 'scroll', handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** Will be fired whenever CodeMirror updates its DOM display. */
+        on(eventName: 'update', handler: (instance: CodeMirror.Editor) => void ): void;
+        off(eventName: 'update', handler: (instance: CodeMirror.Editor) => void ): void;
+
+        /** Fired whenever a line is (re-)rendered to the DOM. Fired right after the DOM element is built, before it is added to the document.
+        The handler may mess with the style of the resulting element, or add event handlers, but should not try to change the state of the editor. */
+        on(eventName: 'renderLine', handler: (instance: CodeMirror.Editor, line: number, element: HTMLElement) => void ): void;
+        off(eventName: 'renderLine', handler: (instance: CodeMirror.Editor, line: number, element: HTMLElement) => void ): void;
+
+        /** Expose the state object, so that the Editor.state.completionActive property is reachable*/
+        state: any;
+    }
+
+    interface EditorFromTextArea extends Editor {
+
+        /** Copy the content of the editor into the textarea. */
+        save(): void;
+
+        /** Remove the editor, and restore the original textarea (with the editor's current content). */
+        toTextArea(): void;
+
+        /** Returns the textarea that the instance was based on. */
+        getTextArea(): HTMLTextAreaElement;
+    }
+
+    interface DocConstructor {
+        new (text: string, mode?: any, firstLineNumber?: number, lineSep?: string): Doc;
+        (text: string, mode?: any, firstLineNumber?: number, lineSep?: string): Doc;
+    }
+
+    interface Doc {
+        /** Get the current editor content. You can pass it an optional argument to specify the string to be used to separate lines (defaults to "\n"). */
+        getValue(seperator?: string): string;
+
+        /** Set the editor content. */
+        setValue(content: string): void;
+
+        /** Get the text between the given points in the editor, which should be {line, ch} objects.
+        An optional third argument can be given to indicate the line separator string to use (defaults to "\n"). */
+        getRange(from: Position, to: CodeMirror.Position, seperator?: string): string;
+
+        /** Replace the part of the document between from and to with the given string.
+        from and to must be {line, ch} objects. to can be left off to simply insert the string at position from. */
+        replaceRange(replacement: string, from: CodeMirror.Position, to: CodeMirror.Position): void;
+
+        /** Get the content of line n. */
+        getLine(n: number): string;
+
+        /** Set the content of line n. */
+        setLine(n: number, text: string): void;
+
+        /** Remove the given line from the document. */
+        removeLine(n: number): void;
+
+        /** Get the number of lines in the editor. */
+        lineCount(): number;
+
+        /** Get the first line of the editor. This will usually be zero but for linked sub-views,
+        or documents instantiated with a non-zero first line, it might return other values. */
+        firstLine(): number;
+
+        /** Get the last line of the editor. This will usually be lineCount() - 1, but for linked sub-views, it might return other values. */
+        lastLine(): number;
+
+        /** Fetches the line handle for the given line number. */
+        getLineHandle(num: number): CodeMirror.LineHandle;
+
+        /** Given a line handle, returns the current position of that line (or null when it is no longer in the document). */
+        getLineNumber(handle: CodeMirror.LineHandle): number;
+
+        /** Iterate over the whole document, and call f for each line, passing the line handle.
+        This is a faster way to visit a range of line handlers than calling getLineHandle for each of them.
+        Note that line handles have a text property containing the line's content (as a string). */
+        eachLine(f: (line: CodeMirror.LineHandle) => void ): void;
+
+        /** Iterate over the range from start up to (not including) end, and call f for each line, passing the line handle.
+        This is a faster way to visit a range of line handlers than calling getLineHandle for each of them.
+        Note that line handles have a text property containing the line's content (as a string). */
+        eachLine(start: number, end: number, f: (line: CodeMirror.LineHandle) => void ): void;
+
+        /** Set the editor content as 'clean', a flag that it will retain until it is edited, and which will be set again when such an edit is undone again.
+        Useful to track whether the content needs to be saved. */
+        markClean(): void;
+
+        /** Returns whether the document is currently clean (not modified since initialization or the last call to markClean). */
+        isClean(): boolean;
+
+
+
+        /** Get the currently selected code. */
+        getSelection(): string;
+
+        /** Replace the selection with the given string. By default, the new selection will span the inserted text.
+        The optional collapse argument can be used to change this � passing "start" or "end" will collapse the selection to the start or end of the inserted text. */
+        replaceSelection(replacement: string, collapse?: string): void;
+
+        /** start is a an optional string indicating which end of the selection to return.
+        It may be "start" , "end" , "head"(the side of the selection that moves when you press shift + arrow),
+        or "anchor"(the fixed side of the selection).Omitting the argument is the same as passing "head".A { line , ch } object will be returned. */
+        getCursor(start?: string): CodeMirror.Position;
+
+        /** Retrieves a list of all current selections. These will always be sorted, and never overlap (overlapping selections are merged).
+        Each object in the array contains anchor and head properties referring to {line, ch} objects. */
+        listSelections(): { anchor: CodeMirror.Position; head: CodeMirror.Position }[];
+
+        /** Return true if any text is selected. */
+        somethingSelected(): boolean;
+
+        /** Set the cursor position.You can either pass a single { line , ch } object , or the line and the character as two separate parameters. */
+        setCursor(pos: CodeMirror.Position): void;
+
+        /** Set the selection range.anchor and head should be { line , ch } objects.head defaults to anchor when not given. */
+        setSelection(anchor: CodeMirror.Position, head: CodeMirror.Position): void;
+
+        /** Similar to setSelection , but will, if shift is held or the extending flag is set,
+        move the head of the selection while leaving the anchor at its current place.
+        pos2 is optional , and can be passed to ensure a region (for example a word or paragraph) will end up selected
+        (in addition to whatever lies between that region and the current anchor). */
+        extendSelection(from: CodeMirror.Position, to?: CodeMirror.Position): void;
+
+        /** Sets or clears the 'extending' flag , which acts similar to the shift key,
+        in that it will cause cursor movement and calls to extendSelection to leave the selection anchor in place. */
+        setExtending(value: boolean): void;
+
+
+        /** Retrieve the editor associated with a document. May return null. */
+        getEditor(): CodeMirror.Editor;
+
+
+        /** Create an identical copy of the given doc. When copyHistory is true , the history will also be copied.Can not be called directly on an editor. */
+        copy(copyHistory: boolean): CodeMirror.Doc;
+
+        /** Create a new document that's linked to the target document. Linked documents will stay in sync (changes to one are also applied to the other) until unlinked. */
+        linkedDoc(options: {
+            /** When turned on, the linked copy will share an undo history with the original.
+            Thus, something done in one of the two can be undone in the other, and vice versa. */
+            sharedHist?: boolean;
+            from?: number;
+            /** Can be given to make the new document a subview of the original. Subviews only show a given range of lines.
+            Note that line coordinates inside the subview will be consistent with those of the parent,
+            so that for example a subview starting at line 10 will refer to its first line as line 10, not 0. */
+            to?: number;
+            /** By default, the new document inherits the mode of the parent. This option can be set to a mode spec to give it a different mode. */
+            mode: any;
+        }): CodeMirror.Doc;
+
+        /** Break the link between two documents. After calling this , changes will no longer propagate between the documents,
+        and, if they had a shared history, the history will become separate. */
+        unlinkDoc(doc: CodeMirror.Doc): void;
+
+        /** Will call the given function for all documents linked to the target document. It will be passed two arguments,
+        the linked document and a boolean indicating whether that document shares history with the target. */
+        iterLinkedDocs(fn: (doc: CodeMirror.Doc, sharedHist: boolean) => void ): void;
+
+        /** Undo one edit (if any undo events are stored). */
+        undo(): void;
+
+        /** Redo one undone edit. */
+        redo(): void;
+
+        /** Returns an object with {undo, redo } properties , both of which hold integers , indicating the amount of stored undo and redo operations. */
+        historySize(): { undo: number; redo: number; };
+
+        /** Clears the editor's undo history. */
+        clearHistory(): void;
+
+        /** Get a(JSON - serializeable) representation of the undo history. */
+        getHistory(): any;
+
+        /** Replace the editor's undo history with the one provided, which must be a value as returned by getHistory.
+        Note that this will have entirely undefined results if the editor content isn't also the same as it was when getHistory was called. */
+        setHistory(history: any): void;
+
+
+        /** Can be used to mark a range of text with a specific CSS class name. from and to should be { line , ch } objects. */
+        markText(from: CodeMirror.Position, to: CodeMirror.Position, options?: CodeMirror.TextMarkerOptions): TextMarker;
+
+        /** Inserts a bookmark, a handle that follows the text around it as it is being edited, at the given position.
+        A bookmark has two methods find() and clear(). The first returns the current position of the bookmark, if it is still in the document,
+        and the second explicitly removes the bookmark. */
+        setBookmark(pos: CodeMirror.Position, options?: {
+            /** Can be used to display a DOM node at the current location of the bookmark (analogous to the replacedWith option to markText). */
+            widget?: HTMLElement;
+
+            /** By default, text typed when the cursor is on top of the bookmark will end up to the right of the bookmark.
+            Set this option to true to make it go to the left instead. */
+            insertLeft?: boolean;
+        }): CodeMirror.TextMarker;
+
+        /** Returns an array of all the bookmarks and marked ranges found between the given positions. */
+        findMarks(from: CodeMirror.Position, to: CodeMirror.Position): TextMarker[];
+
+        /** Returns an array of all the bookmarks and marked ranges present at the given position. */
+        findMarksAt(pos: CodeMirror.Position): TextMarker[];
+
+        /** Returns an array containing all marked ranges in the document. */
+        getAllMarks(): CodeMirror.TextMarker[];
+
+
+        /** Gets the mode object for the editor. Note that this is distinct from getOption("mode"), which gives you the mode specification,
+        rather than the resolved, instantiated mode object. */
+        getMode(): any;
+
+        /** Calculates and returns a { line , ch } object for a zero-based index whose value is relative to the start of the editor's text.
+        If the index is out of range of the text then the returned object is clipped to start or end of the text respectively. */
+        posFromIndex(index: number): CodeMirror.Position;
+
+        /** The reverse of posFromIndex. */
+        indexFromPos(object: CodeMirror.Position): number;
+
+        /** Expose the state object, so that the Doc.state.completionActive property is reachable*/
+        state: any;
+    }
+
+    interface LineHandle {
+        text: string;
+    }
+
+    interface TextMarker {
+        /** Remove the mark. */
+        clear(): void;
+
+        /** Returns a {from, to} object (both holding document positions), indicating the current position of the marked range,
+        or undefined if the marker is no longer in the document. */
+        find(): CodeMirror.Range;
+
+        /**  Returns an object representing the options for the marker. If copyWidget is given true, it will clone the value of the replacedWith option, if any. */
+        getOptions(copyWidget: boolean): CodeMirror.TextMarkerOptions;
+    }
+
+    interface LineWidget {
+        /** Removes the widget. */
+        clear(): void;
+
+        /** Call this if you made some change to the widget's DOM node that might affect its height.
+        It'll force CodeMirror to update the height of the line that contains the widget. */
+        changed(): void;
+    }
+
+    interface EditorChange {
+        /** Position (in the pre-change coordinate system) where the change started. */
+        from: CodeMirror.Position;
+        /** Position (in the pre-change coordinate system) where the change ended. */
+        to: CodeMirror.Position;
+        /** Array of strings representing the text that replaced the changed range (split by line). */
+        text: string[];
+        /**  Text that used to be between from and to, which is overwritten by this change. */
+        removed: string[];
+        /**  String representing the origin of the change event and wether it can be merged with history */
+        origin: string;
+    }
+
+    interface EditorChangeLinkedList extends CodeMirror.EditorChange {
+        /** Points to another change object (which may point to another, etc). */
+        next?: CodeMirror.EditorChangeLinkedList;
+    }
+
+    interface EditorChangeCancellable extends CodeMirror.EditorChange {
+        /** may be used to modify the change. All three arguments to update are optional, and can be left off to leave the existing value for that field intact. */
+        update(from?: CodeMirror.Position, to?: CodeMirror.Position, text?: string): void;
+
+        cancel(): void;
+    }
+
+    interface PositionConstructor {
+        new (line: number, ch?: number): Position;
+        (line: number, ch?: number): Position;
+    }
+
+    interface Range{
+        from: CodeMirror.Position;
+        to: CodeMirror.Position;
+    }
+
+    interface Position {
+        ch: number;
+        line: number;
+    }
+
+    interface EditorConfiguration {
+        /** string| The starting value of the editor. Can be a string, or a document object. */
+        value?: any;
+
+        /** string|object. The mode to use. When not given, this will default to the first mode that was loaded.
+        It may be a string, which either simply names the mode or is a MIME type associated with the mode.
+        Alternatively, it may be an object containing configuration options for the mode,
+        with a name property that names the mode (for example {name: "javascript", json: true}). */
+        mode?: any;
+
+        /** The theme to style the editor with. You must make sure the CSS file defining the corresponding .cm-s-[name] styles is loaded.
+        The default is "default". */
+        theme?: string;
+
+        /** How many spaces a block (whatever that means in the edited language) should be indented. The default is 2. */
+        indentUnit?: number;
+
+        /** Whether to use the context-sensitive indentation that the mode provides (or just indent the same as the line before). Defaults to true. */
+        smartIndent?: boolean;
+
+        /** The width of a tab character. Defaults to 4. */
+        tabSize?: number;
+
+        /** Whether, when indenting, the first N*tabSize spaces should be replaced by N tabs. Default is false. */
+        indentWithTabs?: boolean;
+
+        /** Configures whether the editor should re-indent the current line when a character is typed
+        that might change its proper indentation (only works if the mode supports indentation). Default is true. */
+        electricChars?: boolean;
+
+        /** Determines whether horizontal cursor movement through right-to-left (Arabic, Hebrew) text
+        is visual (pressing the left arrow moves the cursor left)
+        or logical (pressing the left arrow moves to the next lower index in the string, which is visually right in right-to-left text).
+        The default is false on Windows, and true on other platforms. */
+        rtlMoveVisually?: boolean;
+
+        /** Configures the keymap to use. The default is "default", which is the only keymap defined in codemirror.js itself.
+        Extra keymaps are found in the keymap directory. See the section on keymaps for more information. */
+        keyMap?: string;
+
+        /** Can be used to specify extra keybindings for the editor, alongside the ones defined by keyMap. Should be either null, or a valid keymap value. */
+        extraKeys?: any;
+
+        /** Whether CodeMirror should scroll or wrap for long lines. Defaults to false (scroll). */
+        lineWrapping?: boolean;
+
+        /** Whether to show line numbers to the left of the editor. */
+        lineNumbers?: boolean;
+
+        /** At which number to start counting lines. Default is 1. */
+        firstLineNumber?: number;
+
+        /** A function used to format line numbers. The function is passed the line number, and should return a string that will be shown in the gutter. */
+        lineNumberFormatter?: (line: number) => string;
+
+        /** Can be used to add extra gutters (beyond or instead of the line number gutter).
+        Should be an array of CSS class names, each of which defines a width (and optionally a background),
+        and which will be used to draw the background of the gutters.
+        May include the CodeMirror-linenumbers class, in order to explicitly set the position of the line number gutter
+        (it will default to be to the right of all other gutters). These class names are the keys passed to setGutterMarker. */
+        gutters?: string[];
+
+        /** Determines whether the gutter scrolls along with the content horizontally (false)
+        or whether it stays fixed during horizontal scrolling (true, the default). */
+        fixedGutter?: boolean;
+
+        /** boolean|string. This disables editing of the editor content by the user. If the special value "nocursor" is given (instead of simply true), focusing of the editor is also disallowed. */
+        readOnly?: any;
+
+        /**Whether the cursor should be drawn when a selection is active. Defaults to false. */
+        showCursorWhenSelecting?: boolean;
+
+        /** The maximum number of undo levels that the editor stores. Defaults to 40. */
+        undoDepth?: number;
+
+        /** The period of inactivity (in milliseconds) that will cause a new history event to be started when typing or deleting. Defaults to 500. */
+        historyEventDelay?: number;
+
+        /** The tab index to assign to the editor. If not given, no tab index will be assigned. */
+        tabindex?: number;
+
+        /** Can be used to make CodeMirror focus itself on initialization. Defaults to off.
+        When fromTextArea is used, and no explicit value is given for this option, it will be set to true when either the source textarea is focused,
+        or it has an autofocus attribute and no other element is focused. */
+        autofocus?: boolean;
+
+        /** Controls whether drag-and - drop is enabled. On by default. */
+        dragDrop?: boolean;
+
+        /** When given , this will be called when the editor is handling a dragenter , dragover , or drop event.
+        It will be passed the editor instance and the event object as arguments.
+        The callback can choose to handle the event itself , in which case it should return true to indicate that CodeMirror should not do anything further. */
+        onDragEvent?: (instance: CodeMirror.Editor, event: Event) => boolean;
+
+        /** This provides a rather low - level hook into CodeMirror's key handling.
+        If provided, this function will be called on every keydown, keyup, and keypress event that CodeMirror captures.
+        It will be passed two arguments, the editor instance and the key event.
+        This key event is pretty much the raw key event, except that a stop() method is always added to it.
+        You could feed it to, for example, jQuery.Event to further normalize it.
+        This function can inspect the key event, and handle it if it wants to.
+        It may return true to tell CodeMirror to ignore the event.
+        Be wary that, on some browsers, stopping a keydown does not stop the keypress from firing, whereas on others it does.
+        If you respond to an event, you should probably inspect its type property and only do something when it is keydown
+        (or keypress for actions that need character data). */
+        onKeyEvent?: (instance: CodeMirror.Editor, event: Event) => boolean;
+
+        /** Half - period in milliseconds used for cursor blinking. The default blink rate is 530ms. */
+        cursorBlinkRate?: number;
+
+        /** Determines the height of the cursor. Default is 1 , meaning it spans the whole height of the line.
+        For some fonts (and by some tastes) a smaller height (for example 0.85),
+        which causes the cursor to not reach all the way to the bottom of the line, looks better */
+        cursorHeight?: number;
+
+        /** Highlighting is done by a pseudo background - thread that will work for workTime milliseconds,
+        and then use timeout to sleep for workDelay milliseconds.
+        The defaults are 200 and 300, you can change these options to make the highlighting more or less aggressive. */
+        workTime?: number;
+
+        /** See workTime. */
+        workDelay?: number;
+
+        /** Indicates how quickly CodeMirror should poll its input textarea for changes(when focused).
+        Most input is captured by events, but some things, like IME input on some browsers, don't generate events that allow CodeMirror to properly detect it.
+        Thus, it polls. Default is 100 milliseconds. */
+        pollInterval?: number
+
+        /** By default, CodeMirror will combine adjacent tokens into a single span if they have the same class.
+        This will result in a simpler DOM tree, and thus perform better. With some kinds of styling(such as rounded corners),
+        this will change the way the document looks. You can set this option to false to disable this behavior. */
+        flattenSpans?: boolean;
+
+        /** When highlighting long lines, in order to stay responsive, the editor will give up and simply style
+        the rest of the line as plain text when it reaches a certain position. The default is 10000.
+        You can set this to Infinity to turn off this behavior. */
+        maxHighlightLength?: number;
+
+        /** Specifies the amount of lines that are rendered above and below the part of the document that's currently scrolled into view.
+        This affects the amount of updates needed when scrolling, and the amount of work that such an update does.
+        You should usually leave it at its default, 10. Can be set to Infinity to make sure the whole document is always rendered,
+        and thus the browser's text search works on it. This will have bad effects on performance of big documents. */
+        viewportMargin?: number;
+
+        /** Optional lint configuration to be used in conjunction with CodeMirror's linter addon. */
+        lint?: boolean | LintOptions;
+
+        /** Optional value to be used in conjunction with CodeMirror’s placeholder add-on. */
+        placeholder?: string;
+    }
+
+    interface TextMarkerOptions {
+        /** Assigns a CSS class to the marked stretch of text. */
+        className?: string;
+
+        /** Determines whether text inserted on the left of the marker will end up inside or outside of it. */
+        inclusiveLeft?: boolean;
+
+        /** Like inclusiveLeft , but for the right side. */
+        inclusiveRight?: boolean;
+
+        /** Atomic ranges act as a single unit when cursor movement is concerned — i.e. it is impossible to place the cursor inside of them.
+        In atomic ranges, inclusiveLeft and inclusiveRight have a different meaning — they will prevent the cursor from being placed
+        respectively directly before and directly after the range. */
+        atomic?: boolean;
+
+        /** Collapsed ranges do not show up in the display.Setting a range to be collapsed will automatically make it atomic. */
+        collapsed?: boolean;
+
+        /** When enabled, will cause the mark to clear itself whenever the cursor enters its range.
+        This is mostly useful for text - replacement widgets that need to 'snap open' when the user tries to edit them.
+        The "clear" event fired on the range handle can be used to be notified when this happens. */
+        clearOnEnter?: boolean;
+
+        /** Determines whether the mark is automatically cleared when it becomes empty. Default is true. */
+        clearWhenEmpty?: boolean;
+
+        /** Use a given node to display this range.Implies both collapsed and atomic.
+        The given DOM node must be an inline element(as opposed to a block element). */
+        replacedWith?: HTMLElement;
+
+        /** When replacedWith is given, this determines whether the editor will
+         * capture mouse and drag events occurring in this widget. Default is
+         * false—the events will be left alone for the default browser handler,
+         * or specific handlers on the widget, to capture. */
+        handleMouseEvents?: boolean;
+
+        /** A read - only span can, as long as it is not cleared, not be modified except by calling setValue to reset the whole document.
+        Note: adding a read - only span currently clears the undo history of the editor,
+        because existing undo events being partially nullified by read - only spans would corrupt the history (in the current implementation). */
+        readOnly?: boolean;
+
+        /** When set to true (default is false), adding this marker will create an event in the undo history that can be individually undone(clearing the marker). */
+        addToHistory?: boolean;
+
+        /** Can be used to specify an extra CSS class to be applied to the leftmost span that is part of the marker. */
+        startStyle?: string;
+
+        /** Equivalent to startStyle, but for the rightmost span. */
+        endStyle?: string;
+
+        /** A string of CSS to be applied to the covered text. For example "color: #fe3". */
+        css?: string;
+
+        /** When given, will give the nodes created for this span a HTML title attribute with the given value. */
+        title?: string;
+
+        /** When the target document is linked to other documents, you can set shared to true to make the marker appear in all documents.
+        By default, a marker appears only in its target document. */
+        shared?: boolean;
+    }
+
+    interface StringStream {
+        lastColumnPos: number;
+        lastColumnValue: number;
+        lineStart: number;
+
+        /**
+         * Current position in the string.
+         */
+        pos: number;
+
+        /**
+         * Where the stream's position was when it was first passed to the token function.
+         */
+        start: number;
+
+        /**
+         * The current line's content.
+         */
+        string: string;
+
+        /**
+         * Number of spaces per tab character.
+         */
+        tabSize: number;
+
+        /**
+         * Returns true only if the stream is at the end of the line.
+         */
+        eol(): boolean;
+
+        /**
+         * Returns true only if the stream is at the start of the line.
+         */
+        sol(): boolean;
+
+        /**
+         * Returns the next character in the stream without advancing it. Will return an null at the end of the line.
+         */
+        peek(): string;
+
+        /**
+         * Returns the next character in the stream and advances it. Also returns null when no more characters are available.
+         */
+        next(): string;
+
+        /**
+         * match can be a character, a regular expression, or a function that takes a character and returns a boolean.
+         * If the next character in the stream 'matches' the given argument, it is consumed and returned.
+         * Otherwise, undefined is returned.
+         */
+        eat(match: string): string;
+        eat(match: RegExp): string;
+        eat(match: (char: string) => boolean): string;
+
+        /**
+         * Repeatedly calls eat with the given argument, until it fails. Returns true if any characters were eaten.
+         */
+        eatWhile(match: string): boolean;
+        eatWhile(match: RegExp): boolean;
+        eatWhile(match: (char: string) => boolean): boolean;
+
+        /**
+         * Shortcut for eatWhile when matching white-space.
+         */
+        eatSpace(): boolean;
+
+        /**
+         * Moves the position to the end of the line.
+         */
+        skipToEnd(): void;
+
+        /**
+         * Skips to the next occurrence of the given character, if found on the current line (doesn't advance the stream if
+         * the character does not occur on the line).
+         *
+         * Returns true if the character was found.
+         */
+        skipTo(ch: string): boolean;
+
+        /**
+         * Act like a multi-character eat - if consume is true or not given - or a look-ahead that doesn't update the stream
+         * position - if it is false. pattern can be either a string or a regular expression starting with ^. When it is a
+         * string, caseFold can be set to true to make the match case-insensitive. When successfully matching a regular
+         * expression, the returned value will be the array returned by match, in case you need to extract matched groups.
+         */
+        match(pattern: string, consume?: boolean, caseFold?: boolean): boolean;
+        match(pattern: RegExp, consume?: boolean): string[];
+
+        /**
+         * Backs up the stream n characters. Backing it up further than the start of the current token will cause things to
+         * break, so be careful.
+         */
+        backUp(n: number): void;
+
+        /**
+         * Returns the column (taking into account tabs) at which the current token starts.
+         */
+        column(): number;
+
+        /**
+         * Tells you how far the current line has been indented, in spaces. Corrects for tab characters.
+         */
+        indentation(): number;
+
+        /**
+         * Get the string between the start of the current token and the current stream position.
+         */
+        current(): string;
+    }
+
     /**
-    * The number of failed assertions
-    */
-    failed: number;
-
-    /**
-    * The number of passed assertions
-    */
-    passed: number;
-
-    /**
-    * The total number of assertions
-    */
-    total: number;
-
-    /**
-    * The time in milliseconds it took tests to run from start to finish.
-    */
-    runtime: number;
-}
-
-interface LogCallbackObject {
-    /**
-    * The boolean result of an assertion, true means passed, false means failed.
-    */
-    result: boolean;
-
-    /**
-    * One side of a comparision assertion. Can be undefined when ok() is used.
-    */
-    actual: Object;
-
-    /**
-    * One side of a comparision assertion. Can be undefined when ok() is used.
-    */
-    expected: Object;
-
-    /**
-    * A string description provided by the assertion.
-    */
-    message: string;
-
-    /**
-    * The associated stacktrace, either from an exception or pointing to the source
-    * of the assertion. Depends on browser support for providing stacktraces, so can be
-    * undefined.
-    */
-    source: string;
-}
-
-interface ModuleStartCallbackObject {
-    /**
-    * Name of the next module to run
-    */
-    name: string;
-}
-
-interface ModuleDoneCallbackObject {
-    /**
-    * Name of this module
-    */
-    name: string;
-
-    /**
-    * The number of failed assertions
-    */
-    failed: number;
-
-    /**
-    * The number of passed assertions
-    */
-    passed: number;
-
-    /**
-    * The total number of assertions
-    */
-    total: number;
-}
-
-interface TestDoneCallbackObject {
-    /**
-    * TName of the next test to run
-    */
-    name: string;
-
-    /**
-    * Name of the current module
-    */
-    module: string;
-
-    /**
-    * The number of failed assertions
-    */
-    failed: number;
-
-    /**
-    * The number of passed assertions
-    */
-    passed: number;
-
-    /**
-    * The total number of assertions
-    */
-    total: number;
-
-    /**
-    * The total runtime, including setup and teardown
-    */
-    duration: number;
-}
-
-interface TestStartCallbackObject {
-    /**
-    * Name of the next test to run
-    */
-    name: string;
-
-    /**
-    * Name of the current module
-    */
-    module: string;
-}
-
-interface Config {
-    altertitle: boolean;
-    autostart: boolean;
-    current: Object;
-    reorder: boolean;
-    requireExpects: boolean;
-    testTimeout: number;
-    urlConfig: Array<URLConfigItem>;
-    done: any;
-}
-
-interface URLConfigItem {
-    id: string;
-    label: string;
-    tooltip: string;
-}
-
-interface LifecycleObject {
-    /**
-     * Runs before each test
-     * @param assert
-     * @deprecated
+     * A Mode is, in the simplest case, a lexer (tokenizer) for your language — a function that takes a character stream as input,
+     * advances it past a token, and returns a style for that token. More advanced modes can also handle indentation for the language.
      */
-    setup?: (assert: QUnitAssert) => void;
+    interface Mode<T> {
+        /**
+         * This function should read one token from the stream it is given as an argument, optionally update its state,
+         * and return a style string, or null for tokens that do not have to be styled. Multiple styles can be returned, separated by spaces.
+         */
+        token(stream: StringStream, state: T): string;
+
+        /**
+         * A function that produces a state object to be used at the start of a document.
+         */
+        startState?: () => T;
+        /**
+         * For languages that have significant blank lines, you can define a blankLine(state) method on your mode that will get called
+         * whenever a blank line is passed over, so that it can update the parser state.
+         */
+        blankLine?: (state: T) => void;
+        /**
+         * Given a state returns a safe copy of that state.
+         */
+        copyState?: (state: T) => T;
+
+        /**
+         * The indentation method should inspect the given state object, and optionally the textAfter string, which contains the text on
+         * the line that is being indented, and return an integer, the amount of spaces to indent.
+         */
+        indent?: (state: T, textAfter: string) => number;
+
+        /** The four below strings are used for working with the commenting addon. */
+        /**
+         * String that starts a line comment.
+         */
+        lineComment?: string;
+        /**
+         * String that starts a block comment.
+         */
+        blockCommentStart?: string;
+        /**
+         * String that ends a block comment.
+         */
+        blockCommentEnd?: string;
+        /**
+         * String to put at the start of continued lines in a block comment.
+         */
+        blockCommentLead?: string;
+
+        /**
+         * Trigger a reindent whenever one of the characters in the string is typed.
+         */
+        electricChars?: string
+        /**
+         * Trigger a reindent whenever the regex matches the part of the line before the cursor.
+         */
+        electricinput?: RegExp
+    }
 
     /**
-     * Runs after each test
-     * @param assert
-     * @deprecated
+     * A function that, given a CodeMirror configuration object and an optional mode configuration object, returns a mode object.
      */
-    teardown?: (assert: QUnitAssert) => void;
+    interface ModeFactory<T> {
+        (config: CodeMirror.EditorConfiguration, modeOptions?: any): Mode<T>
+    }
+
     /**
-     * Runs before each test
-     * @param assert
+     * id will be the id for the defined mode. Typically, you should use this second argument to defineMode as your module scope function
+     * (modes should not leak anything into the global scope!), i.e. write your whole mode inside this function.
      */
-    beforeEach?: (assert: QUnitAssert) => void;
+    function defineMode(id: string, modefactory: ModeFactory<any>): void;
+
     /**
-     * Runs after each test
-     * @param assert
+     * The first argument is a configuration object as passed to the mode constructor function, and the second argument
+     * is a mode specification as in the EditorConfiguration mode option.
      */
-    afterEach?: (assert: QUnitAssert) => void;
+    function getMode<T>(config: CodeMirror.EditorConfiguration, mode: any): Mode<T>;
 
     /**
-     * Any additional properties on the hooks object will be added to that context.
+     * Utility function from the overlay.js addon that allows modes to be combined. The mode given as the base argument takes care of
+     * most of the normal mode functionality, but a second (typically simple) mode is used, which can override the style of text.
+     * Both modes get to parse all of the text, but when both assign a non-null style to a piece of code, the overlay wins, unless
+     * the combine argument was true and not overridden, or state.overlay.combineTokens was true, in which case the styles are combined.
      */
-    [property: string]: any;
+    function overlayMode<T, S>(base: Mode<T>, overlay: Mode<S>, combine?: boolean): Mode<any>
+
+    /**
+     * async specifies that the lint process runs asynchronously. hasGutters specifies that lint errors should be displayed in the CodeMirror
+     * gutter, note that you must use this in conjunction with [ "CodeMirror-lint-markers" ] as an element in the gutters argument on
+     * initialization of the CodeMirror instance.
+     */
+    interface LintStateOptions {
+        async: boolean;
+        hasGutters: boolean;
+    }
+
+    /**
+     * Adds the getAnnotations callback to LintStateOptions which may be overridden by the user if they choose use their own
+     * linter.
+     */
+    interface LintOptions extends LintStateOptions {
+        getAnnotations: AnnotationsCallback;
+    }
+
+    /**
+     * A function that calls the updateLintingCallback with any errors found during the linting process.
+     */
+    interface AnnotationsCallback {
+        (content: string, updateLintingCallback: UpdateLintingCallback, options: LintStateOptions, codeMirror: Editor): void;
+    }
+
+    /**
+     * A function that, given an array of annotations, updates the CodeMirror linting GUI with those annotations
+     */
+    interface UpdateLintingCallback {
+        (codeMirror: Editor, annotations: Annotation[]): void;
+    }
+
+    /**
+     * An annotation contains a description of a lint error, detailing the location of the error within the code, the severity of the error,
+     * and an explaination as to why the error was thrown.
+     */
+    interface Annotation {
+        from: Position;
+        message?: string;
+        severity?: string;
+        to?: Position;
+    }
 }
 
-interface QUnitAssert {
-    /* ASSERT */
-    assert: any;
-    current_testEnvironment: any;
-    jsDump: any;
-
-    /**
-    * Instruct QUnit to wait for an asynchronous operation.
-    *
-    * When your test has any asynchronous exit points, call assert.async() to get a unique
-    * resolution callback for each async operation. The callback returned from assert.async()
-    * will throw an Error if is invoked more than once.
-    */
-    async(): () => void;
-
-    /**
-    * A deep recursive comparison assertion, working on primitive types, arrays, objects,
-    * regular expressions, dates and functions.
-    *
-    * The deepEqual() assertion can be used just like equal() when comparing the value of
-    * objects, such that { key: value } is equal to { key: value }. For non-scalar values,
-    * identity will be disregarded by deepEqual.
-    *
-    * @param actual Object or Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    deepEqual(actual: any, expected: any, message?: string): any;
-
-    /**
-    * A non-strict comparison assertion, roughly equivalent to JUnit assertEquals.
-    *
-    * The equal assertion uses the simple comparison operator (==) to compare the actual
-    * and expected arguments. When they are equal, the assertion passes: any; otherwise, it fails.
-    * When it fails, both actual and expected values are displayed in the test result,
-    * in addition to a given message.
-    *
-    * @param actual Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    equal(actual: any, expected: any, message?: string): any;
-
-    /**
-    * Specify how many assertions are expected to run within a test.
-    *
-    * To ensure that an explicit number of assertions are run within any test, use
-    * expect( number ) to register an expected count. If the number of assertions
-    * run does not match the expected count, the test will fail.
-    *
-    * @param amount Number of assertions in this test.
-    */
-    expect(amount: number): any;
-
-    /**
-    * An inverted deep recursive comparison assertion, working on primitive types,
-    * arrays, objects, regular expressions, dates and functions.
-    *
-    * The notDeepEqual() assertion can be used just like equal() when comparing the
-    * value of objects, such that { key: value } is equal to { key: value }. For non-scalar
-    * values, identity will be disregarded by notDeepEqual.
-    *
-    * @param actual Object or Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    notDeepEqual(actual: any, expected: any, message?: string): any;
-
-    /**
-    * A non-strict comparison assertion, checking for inequality.
-    *
-    * The notEqual assertion uses the simple inverted comparison operator (!=) to compare
-    * the actual and expected arguments. When they aren't equal, the assertion passes: any;
-    * otherwise, it fails. When it fails, both actual and expected values are displayed
-    * in the test result, in addition to a given message.
-    *
-    * @param actual Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    notEqual(actual: any, expected: any, message?: string): any;
-
-    notPropEqual(actual: any, expected: any, message?: string): any;
-
-    propEqual(actual: any, expected: any, message?: string): any;
-
-    /**
-    * A non-strict comparison assertion, checking for inequality.
-    *
-    * The notStrictEqual assertion uses the strict inverted comparison operator (!==)
-    * to compare the actual and expected arguments. When they aren't equal, the assertion
-    * passes: any; otherwise, it fails. When it fails, both actual and expected values are
-    * displayed in the test result, in addition to a given message.
-    *
-    * @param actual Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    notStrictEqual(actual: any, expected: any, message?: string): any;
-
-    /**
-    * A boolean assertion, equivalent to CommonJS’s assert.ok() and JUnit’s assertTrue().
-    * Passes if the first argument is truthy.
-    *
-    * The most basic assertion in QUnit, ok() requires just one argument. If the argument
-    * evaluates to true, the assertion passes; otherwise, it fails. If a second message
-    * argument is provided, it will be displayed in place of the result.
-    *
-    * @param state Expression being tested
-    * @param message A short description of the assertion
-    */
-    ok(state: any, message?: string): any;
-
-    /**
-    * A strict type and value comparison assertion.
-    *
-    * The strictEqual() assertion provides the most rigid comparison of type and value with
-    * the strict equality operator (===)
-    *
-    * @param actual Expression being tested
-    * @param expected Known comparison value
-    * @param message A short description of the assertion
-    */
-    strictEqual(actual: any, expected: any, message?: string): any;
-
-    /**
-    * Assertion to test if a callback throws an exception when run.
-    *
-    * When testing code that is expected to throw an exception based on a specific set of
-    * circumstances, use throws() to catch the error object for testing and comparison.
-    *
-    * @param block Function to execute
-    * @param expected Error Object to compare
-    * @param message A short description of the assertion
-    */
-    throws(block: () => any, expected: any, message?: string): any;
-
-    /**
-    * @param block Function to execute
-    * @param message A short description of the assertion
-    */
-    throws(block: () => any, message?: string): any;
-
-    /**
-    * Alias of throws.
-    *
-    * In very few environments, like Closure Compiler, throws is considered a reserved word
-    * and will cause an error. For that case, an alias is bundled called raises. It has the
-    * same signature and behaviour, just a different name.
-    *
-    * @param block Function to execute
-    * @param expected Error Object to compare
-    * @param message A short description of the assertion
-    */
-    raises(block: () => any, expected: any, message?: string): any;
-
-    /**
-    * Alias of throws.
-    *
-    * In very few environments, like Closure Compiler, throws is considered a reserved word
-    * and will cause an error. For that case, an alias is bundled called raises. It has the
-    * same signature and behaviour, just a different name.
-    *
-    * @param block Function to execute
-    * @param message A short description of the assertion
-    */
-    raises(block: () => any, message?: string): any;
-}
-
-interface QUnitStatic extends QUnitAssert {
-    /* ASYNC CONTROL */
-
-    /**
-    * Start running tests again after the testrunner was stopped. See stop().
-    *
-    * When your async test has multiple exit points, call start() for the corresponding number of stop() increments.
-    *
-    * @param decrement Optional argument to merge multiple start() calls into one. Use with multiple corrsponding stop() calls.
-    */
-    start(decrement?: number): any;
-
-    /**
-    * Stop the testrunner to wait for async tests to run. Call start() to continue.
-    *
-    * When your async test has multiple exit points, call stop() with the increment argument, corresponding to the number of start() calls you need.
-    *
-    * On Blackberry 5.0, window.stop is a native read-only function. If you deal with that browser, use QUnit.stop() instead, which will work anywhere.
-    *
-    * @param decrement Optional argument to merge multiple stop() calls into one. Use with multiple corrsponding start() calls.
-    */
-    stop(increment?: number): any;
-
-    /* CALLBACKS */
-
-    /**
-    * Register a callback to fire whenever the test suite begins.
-    *
-    * QUnit.begin() is called once before running any tests. (a better would've been QUnit.start,
-    * but thats already in use elsewhere and can't be changed.)
-    *
-    * @param callback Callback to execute
-    */
-    begin(callback: () => any): any;
-
-    /**
-    * Register a callback to fire whenever the test suite ends.
-    *
-    * @param callback Callback to execute.
-    */
-    done(callback: (details: DoneCallbackObject) => any): any;
-
-    /**
-    * Register a callback to fire whenever an assertion completes.
-    *
-    * This is one of several callbacks QUnit provides. Its intended for integration scenarios like
-    * PhantomJS or Jenkins. The properties of the details argument are listed below as options.
-    *
-    * @param callback Callback to execute.
-    */
-    log(callback: (details: LogCallbackObject) => any): any;
-
-    /**
-    * Register a callback to fire whenever a module ends.
-    *
-    * @param callback Callback to execute.
-    */
-    moduleDone(callback: (details: ModuleDoneCallbackObject) => any): any;
-
-    /**
-    * Register a callback to fire whenever a module begins.
-    *
-    * @param callback Callback to execute.
-    */
-    moduleStart(callback: (details: ModuleStartCallbackObject) => any): any;
-
-    /**
-    * Register a callback to fire whenever a test ends.
-    *
-    * @param callback Callback to execute.
-    */
-    testDone(callback: (details: TestDoneCallbackObject) => any): any;
-
-    /**
-    * Register a callback to fire whenever a test begins.
-    *
-    * @param callback Callback to execute.
-    */
-    testStart(callback: (details: TestStartCallbackObject) => any): any;
-
-    /* CONFIGURATION */
-
-    /**
-    * QUnit has a bunch of internal configuration defaults, some of which are
-    * useful to override. Check the description for each option for details.
-    */
-    config: Config;
-
-    /* TEST */
-
-    /**
-    * Add an asynchronous test to run. The test must include a call to start().
-    *
-    * For testing asynchronous code, asyncTest will automatically stop the test runner
-    * and wait for your code to call start() to continue.
-    *
-    * @param name Title of unit being tested
-    * @param expected Number of assertions in this test
-    * @param test Function to close over assertions
-    */
-    asyncTest(name: string, expected: number, test: (assert: QUnitAssert) => any): any;
-
-    /**
-    * Add an asynchronous test to run. The test must include a call to start().
-    *
-    * For testing asynchronous code, asyncTest will automatically stop the test runner
-    * and wait for your code to call start() to continue.
-    *
-    * @param name Title of unit being tested
-    * @param test Function to close over assertions
-    */
-    asyncTest(name: string, test: (assert: QUnitAssert) => any): any;
-
-    /**
-    * Specify how many assertions are expected to run within a test.
-    *
-    * To ensure that an explicit number of assertions are run within any test, use
-    * expect( number ) to register an expected count. If the number of assertions
-    * run does not match the expected count, the test will fail.
-    *
-    * @param amount Number of assertions in this test.
-    * @depricated since version 1.16
-    */
-    expect(amount: number): any;
-
-    /**
-    * Group related tests under a single label.
-    *
-    * All tests that occur after a call to module() will be grouped into that module.
-    * The test names will all be preceded by the module name in the test results.
-    * You can then use that module name to select tests to run.
-    *
-    * @param name Label for this group of tests
-    * @param lifecycle Callbacks to run before and after each test
-    */
-    module(name: string, lifecycle?: LifecycleObject): any;
-
-    /**
-    * Add a test to run.
-    *
-    * When testing the most common, synchronous code, use test().
-    * The assert argument to the callback contains all of QUnit's assertion methods.
-    * If you are avoiding using any of QUnit's globals, you can use the assert
-    * argument instead.
-    *
-    * @param title Title of unit being tested
-    * @param expected Number of assertions in this test
-    * @param test Function to close over assertions
-    */
-    test(title: string, expected: number, test: (assert: QUnitAssert) => any): any;
-
-    /**
-    * @param title Title of unit being tested
-    * @param test Function to close over assertions
-    */
-    test(title: string, test: (assert: QUnitAssert) => any): any;
-
-    /**
-    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L1568
-    */
-    equiv(a: any, b: any): any;
-
-    /**
-    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L897
-    */
-    push(result: any, actual: any, expected: any, message: string): any;
-
-    /**
-    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L839
-    */
-    reset(): any;
-}
-
-/* ASSERT */
-
-/**
-* A deep recursive comparison assertion, working on primitive types, arrays, objects,
-* regular expressions, dates and functions.
-*
-* The deepEqual() assertion can be used just like equal() when comparing the value of
-* objects, such that { key: value } is equal to { key: value }. For non-scalar values,
-* identity will be disregarded by deepEqual.
-*
-* @param actual Object or Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function deepEqual(actual: any, expected: any, message?: string): any;
-
-/**
-* A non-strict comparison assertion, roughly equivalent to JUnit assertEquals.
-*
-* The equal assertion uses the simple comparison operator (==) to compare the actual
-* and expected arguments. When they are equal, the assertion passes: any; otherwise, it fails.
-* When it fails, both actual and expected values are displayed in the test result,
-* in addition to a given message.
-*
-* @param actual Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function equal(actual: any, expected: any, message?: string): any;
-
-/**
-* An inverted deep recursive comparison assertion, working on primitive types,
-* arrays, objects, regular expressions, dates and functions.
-*
-* The notDeepEqual() assertion can be used just like equal() when comparing the
-* value of objects, such that { key: value } is equal to { key: value }. For non-scalar
-* values, identity will be disregarded by notDeepEqual.
-*
-* @param actual Object or Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function notDeepEqual(actual: any, expected: any, message?: string): any;
-
-/**
-* A non-strict comparison assertion, checking for inequality.
-*
-* The notEqual assertion uses the simple inverted comparison operator (!=) to compare
-* the actual and expected arguments. When they aren't equal, the assertion passes;
-* otherwise, it fails. When it fails, both actual and expected values are displayed
-* in the test result, in addition to a given message.
-*
-* @param actual Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function notEqual(actual: any, expected: any, message?: string): any;
-
-/**
-* A non-strict comparison assertion, checking for inequality.
-*
-* The notStrictEqual assertion uses the strict inverted comparison operator (!==)
-* to compare the actual and expected arguments. When they aren't equal, the assertion
-* passes; otherwise, it fails. When it fails, both actual and expected values are
-* displayed in the test result, in addition to a given message.
-*
-* @param actual Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function notStrictEqual(actual: any, expected: any, message?: string): any;
-
-/**
-* A boolean assertion, equivalent to CommonJS’s assert.ok() and JUnit’s assertTrue().
-* Passes if the first argument is truthy.
-*
-* The most basic assertion in QUnit, ok() requires just one argument. If the argument
-* evaluates to true, the assertion passes; otherwise, it fails. If a second message
-* argument is provided, it will be displayed in place of the result.
-*
-* @param state Expression being tested
-* @param message A short description of the assertion
-*/
-declare function ok(state: any, message?: string): any;
-
-/**
-* A strict type and value comparison assertion.
-*
-* The strictEqual() assertion provides the most rigid comparison of type and value with
-* the strict equality operator (===)
-*
-* @param actual Expression being tested
-* @param expected Known comparison value
-* @param message A short description of the assertion
-*/
-declare function strictEqual(actual: any, expected: any, message?: string): any;
-
-/**
-* Assertion to test if a callback throws an exception when run.
-*
-* When testing code that is expected to throw an exception based on a specific set of
-* circumstances, use throws() to catch the error object for testing and comparison.
-*
-* @param block Function to execute
-* @param expected Error Object to compare
-* @param message A short description of the assertion
-*/
-declare function throws(block: () => any, expected: any, message?: string): any;
-
-/**
-* @param block Function to execute
-* @param message A short description of the assertion
-*/
-declare function throws(block: () => any, message?: string): any;
-
-/* ASYNC CONTROL */
-
-/**
-* Start running tests again after the testrunner was stopped. See stop().
-*
-* When your async test has multiple exit points, call start() for the corresponding number of stop() increments.
-*
-* @param decrement Optional argument to merge multiple start() calls into one. Use with multiple corrsponding stop() calls.
-*/
-declare function start(decrement?: number): any;
-
-/**
-* Stop the testrunner to wait for async tests to run. Call start() to continue.
-*
-* When your async test has multiple exit points, call stop() with the increment argument, corresponding to the number of start() calls you need.
-*
-* On Blackberry 5.0, window.stop is a native read-only function. If you deal with that browser, use QUnit.stop() instead, which will work anywhere.
-*
-* @param decrement Optional argument to merge multiple stop() calls into one. Use with multiple corrsponding start() calls.
-*/
-declare function stop(increment?: number): any;
-
-/* CALLBACKS */
-
-/**
-* Register a callback to fire whenever the test suite begins.
-*
-* QUnit.begin() is called once before running any tests. (a better would've been QUnit.start,
-* but thats already in use elsewhere and can't be changed.)
-*
-* @param callback Callback to execute
-*/
-declare function begin(callback: () => any): any;
-
-/**
-* Register a callback to fire whenever the test suite ends.
-*
-* @param callback Callback to execute.
-*/
-declare function done(callback: (details: DoneCallbackObject) => any): any;
-
-/**
-* Register a callback to fire whenever an assertion completes.
-*
-* This is one of several callbacks QUnit provides. Its intended for integration scenarios like
-* PhantomJS or Jenkins. The properties of the details argument are listed below as options.
-*
-* @param callback Callback to execute.
-*/
-declare function log(callback: (details: LogCallbackObject) => any): any;
-
-/**
-* Register a callback to fire whenever a module ends.
-*
-* @param callback Callback to execute.
-*/
-declare function moduleDone(callback: (details: ModuleDoneCallbackObject) => any): any;
-
-/**
-* Register a callback to fire whenever a module begins.
-*
-* @param callback Callback to execute.
-*/
-declare function moduleStart(callback: (name: string) => any): any;
-
-/**
-* Register a callback to fire whenever a test ends.
-*
-* @param callback Callback to execute.
-*/
-declare function testDone(callback: (details: TestDoneCallbackObject) => any): any;
-
-/**
-* Register a callback to fire whenever a test begins.
-*
-* @param callback Callback to execute.
-*/
-declare function testStart(callback: (details: TestStartCallbackObject) => any): any;
-
-/* TEST */
-
-/**
-* Add an asynchronous test to run. The test must include a call to start().
-*
-* For testing asynchronous code, asyncTest will automatically stop the test runner
-* and wait for your code to call start() to continue.
-*
-* @param name Title of unit being tested
-* @param expected Number of assertions in this test
-* @param test Function to close over assertions
-*/
-declare function asyncTest(name: string, expected?: any, test?: (assert: QUnitAssert) => any): any;
-
-/**
-* Add an asynchronous test to run. The test must include a call to start().
-*
-* For testing asynchronous code, asyncTest will automatically stop the test runner
-* and wait for your code to call start() to continue.
-*
-* @param name Title of unit being tested
-* @param test Function to close over assertions
-*/
-declare function asyncTest(name: string, test: (assert: QUnitAssert) => any): any;
-
-/**
-* Specify how many assertions are expected to run within a test.
-*
-* To ensure that an explicit number of assertions are run within any test, use
-* expect( number ) to register an expected count. If the number of assertions
-* run does not match the expected count, the test will fail.
-*
-* @param amount Number of assertions in this test.
-* @depricated since version 1.16
-*/
-declare function expect(amount: number): any;
-
-// ** conflict with TypeScript module keyword. Must be used on QUnit namespace
-//declare var module: (name: string, lifecycle?: LifecycleObject) => any;
-
-/**
-* Add a test to run.
-*
-* When testing the most common, synchronous code, use test().
-* The assert argument to the callback contains all of QUnit's assertion methods.
-* If you are avoiding using any of QUnit's globals, you can use the assert
-* argument instead.
-*
-* @param title Title of unit being tested
-* @param expected Number of assertions in this test
-* @param test Function to close over assertions
-*/
-declare function test(title: string, expected: number, test: (assert?: QUnitAssert) => any): any;
-
-/**
-* @param title Title of unit being tested
-* @param test Function to close over assertions
-*/
-declare function test(title: string, test: (assert?: QUnitAssert) => any): any;
-
-declare function notPropEqual(actual: any, expected: any, message?: string): any;
-
-declare function propEqual(actual: any, expected: any, message?: string): any;
-
-// https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L1568
-declare function equiv(a: any, b: any): any;
-
-// https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L661
-declare var raises: any;
-
-/* QUNIT */
-declare var QUnit: QUnitStatic;interface ISortable {
-	destroy(): void;
-	option(name: string, value?: any): any;
-}
-
-interface SortableOptions {
-	group?: string;
-	handle?: string;
-	ghostClass?: string;
-	draggable?: string;
-	animation?: number;
-	onSort?: Function;
-}
-
-interface SortableStatic {
-    create(el: HTMLElement | Node, options?: SortableOptions): ISortable;
-}
-
-declare var Sortable: SortableStatic;/* tslint:disable:interface-name */
-interface String {
-    asDataUri(): string;
-    contains(str: string): boolean;
-    endsWith(suffix: string): boolean;
-    insert(str: string, index: number): string;
-    padLeft(width: number, str?: string): string;
-    padRight(width: number, str?: string): string;
-    startsWith(prefix: string): boolean;
-    trimEnd(c: string): string;
-    trimStart(c: string): string;
-    localeFormat(format: string, useDefault: boolean): string;
-}
-
-interface Date {
-    netType(value: string);
-    netType(): string;
-
-    netOffset(value: string);
-    netOffset(): string;
-}
-
-interface Number {
-	format(format: string): string;
-}
-
-interface ExpressionParserStatic {
-    alwaysTrue: (count: number) => boolean;
-    get(expression: string): (count: number) => boolean;
-}
-
-declare var ExpressionParser: ExpressionParserStatic;
-
-interface UniqueStatic {
-    get(): string;
-}
-
-declare var Unique: UniqueStatic;
-
-interface StringEx {
-    isNullOrEmpty(str: string): boolean;
-    isNullOrWhiteSpace(str: string): boolean;
-    format(format: string, ...args: any[]): string;
-}
-
-declare var StringEx: StringEx;
-
-
-interface BooleanEx {
-    parse(str: string): boolean;
-}
-
-declare var BooleanEx: BooleanEx;
-
-interface Array<T> {
-    remove(s: T): boolean;
-    removeAll(f: (t: T) => boolean, thisObject?: any): void;
-}
-
-interface BigNumber {
-    toNumber(): number;
-    equals(value: BigNumber): boolean;
-}
-
-declare var BigNumber: {
-    new (number: number | string): BigNumber;
-};
-/* tslint:enable:interface-name */declare var unwrap: <TNode extends Node>(node: TNode) => TNode;
-
-interface Node {
-    /**
-    * Appends the WebComponent to this component.
-    */
-    appendChild<TWebComponent extends Vidyano.WebComponents.WebComponent>(component: TWebComponent): TWebComponent;
-
-    /**
-    * Appends the Node to this component.
-    */
-    appendChild<TNode extends Node>(node: TNode): TNode;
+declare module "codemirror" {
+    export = CodeMirror;
 }// Type definitions for d3JS
 // Project: http://d3js.org/
 // Definitions by: Alex Ford <https://github.com/gustavderdrache>, Boris Yankov <https://github.com/borisyankov>
@@ -5194,7 +4573,1753 @@ declare module Promise {
      */
 	function race<R>(promises: Promise<R>[]): Promise<R>;
 }
-declare namespace Vidyano {
+// Typing for linq.js, ver 3.0.3-Beta4
+
+declare module linqjs {
+    interface IEnumerator<T> {
+        current(): T;
+        moveNext(): Boolean;
+        dispose(): void;
+    }
+
+    interface EnumerableStatic {
+        Utils: {
+            createLambda<T>(expression: T): (...params: T[]) => T;
+            createEnumerable<T>(getEnumerator: () => IEnumerator<T>): Enumerable<T>;
+            createEnumerator<T>(initialize: () => void, tryGetNext: () => Boolean, dispose: () => void): IEnumerator<T>;
+            extendTo<T>(type: T): void;
+        };
+        choice<T>(...params: T[]): Enumerable<T>;
+        cycle<T>(...params: T[]): Enumerable<T>;
+        empty<T>(): Enumerable<T>;
+        from<T>(): Enumerable<T>;
+        from<T>(obj: Enumerable<T>): Enumerable<T>;
+        from(obj: string): Enumerable<string>;
+        from(obj: number): Enumerable<number>;
+        from<T>(obj: { length: number;[x: number]: T; }): Enumerable<T>;
+        from<T>(obj: T): Enumerable<T>;
+        make<T>(element: T): Enumerable<T>;
+        matches<T>(input: string, pattern: RegExp): Enumerable<T>;
+        matches<T>(input: string, pattern: string, flags?: string): Enumerable<T>;
+        range(start: number, count: number, step?: number): Enumerable<number>;
+        rangeDown(start: number, count: number, step?: number): Enumerable<number>;
+        rangeTo(start: number, to: number, step?: number): Enumerable<number>;
+        repeat<T>(element: T, count?: number): Enumerable<T>;
+        repeatWithFinalize<T>(initializer: () => T, finalizer: (element) => void): Enumerable<T>;
+        generate<T>(func: () => T, count?: number): Enumerable<T>;
+        toInfinity<T>(start?: number, step?: number): Enumerable<T>;
+        toNegativeInfinity<T>(start?: number, step?: number): Enumerable<T>;
+        unfold<T>(seed: T, func: (value: T) => T): Enumerable<T>;
+        defer<T>(enumerableFactory: () => Enumerable<T>): Enumerable<T>;
+    }
+
+    interface Enumerable<T> {
+        constructor(getEnumerator: () => IEnumerator<T>);
+        getEnumerator(): IEnumerator<T>;
+
+        // Extension Methods
+        traverseBreadthFirst(func: (element: T) => Enumerable<T>, resultSelector?: (element: T, nestLevel: number) => T): Enumerable<T>;
+        traverseDepthFirst(func: (element: T) => Enumerable<T>, resultSelector?: (element: T, nestLevel: number) => T): Enumerable<T>;
+        flatten(): Enumerable<T>;
+        pairwise(selector: (prev: T, current: T) => T): Enumerable<T>;
+        scan(func: (prev: T, current: T) => T): Enumerable<T>;
+        scan(seed: T, func: (prev: T, current: T) => T): Enumerable<T>;
+        select<TResult>(selector: (element: T, index: number) => TResult): Enumerable<TResult>;
+        selectMany<TResult>(collectionSelector: (element: T, index: number) => TResult[]): Enumerable<TResult>;
+        selectMany<TResult>(collectionSelector: (element: T, index: number) => Enumerable<TResult>): Enumerable<TResult>;
+        where(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
+        choose(selector: (element: T, index: number) => T): Enumerable<T>;
+        ofType(type: T): Enumerable<T>;
+        zip(second: T[], resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        zip(second: Enumerable<T>, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        zip(second: { length: number;[x: number]: T; }, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        zip(...params: T[]): Enumerable<T>; // last one is selector
+        merge(second: T[], resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        merge(second: Enumerable<T>, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        merge(second: { length: number;[x: number]: T; }, resultSelector: (first: T, second: T, index: number) => T): Enumerable<T>;
+        merge(...params: T[]): Enumerable<T>; // last one is selector
+        join(inner: Enumerable<T>, outerKeySelector: (outer: T) => T, innerKeySelector: (inner: T) => T, resultSelector: (outer: T, inner: T) => T, compareSelector?: (obj: T) => T): Enumerable<T>;
+        groupJoin(inner: Enumerable<T>, outerKeySelector: (outer: T) => T, innerKeySelector: (inner: T) => T, resultSelector: (outer: T, inner: T) => T, compareSelector?: (obj: T) => T): Enumerable<T>;
+        all(predicate: (element: T) => Boolean): Boolean;
+        T(predicate?: (element: T) => Boolean): Boolean;
+        isEmpty(): Boolean;
+        concat(sequences: T[]): Enumerable<T>;
+        insert(index: number, second: T[]): Enumerable<T>;
+        insert(index: number, second: Enumerable<T>): Enumerable<T>;
+        insert(index: number, second: { length: number;[x: number]: T; }): Enumerable<T>;
+        alternate(alternateValue: T): Enumerable<T>;
+        alternate(alternateSequence: T[]): Enumerable<T>;
+        alternate(alternateSequence: Enumerable<T>): Enumerable<T>;
+        contains(value: T, compareSelector: (element: T) => T): Enumerable<T>;
+        defaultIfEmpty(defaultValue?: T): Enumerable<T>;
+        distinct<TKey>(compareSelector?: (element: T) => TKey): Enumerable<T>;
+        distinctUntilChanged(compareSelector: (element: T) => T): Enumerable<T>;
+        except(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
+        except(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
+        except(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
+        intersect(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
+        intersect(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
+        intersect(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
+        sequenceEqual(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
+        sequenceEqual(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
+        sequenceEqual(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
+        union(second: T[], compareSelector?: (element: T) => T): Enumerable<T>;
+        union(second: { length: number;[x: number]: T; }, compareSelector?: (element: T) => T): Enumerable<T>;
+        union(second: Enumerable<T>, compareSelector?: (element: T) => T): Enumerable<T>;
+        orderBy<TKey>(keySelector: (element: T) => TKey): OrderedEnumerable<T>;
+        orderByDescending<TKey>(keySelector: (element: T) => TKey): OrderedEnumerable<T>;
+        reverse(): Enumerable<T>;
+        shuffle(): Enumerable<T>;
+        weightedSample(weightSelector: (element: T) => T): Enumerable<T>;
+        groupBy<TKey, TValue>(keySelector: (element: T) => TKey, elementSelector: (element: T) => TValue): Enumerable<Grouping<TKey, TValue>>;
+        partitionBy(keySelector: (element: T) => T, elementSelector?: (element: T) => T, resultSelector?: (key: T, element: T) => T, compareSelector?: (element: T) => T): Enumerable<T>;
+        buffer(count: number): Enumerable<T>;
+        aggregate(func: (prev: T, current: T) => T): T;
+        aggregate(seed: T, func: (prev: T, current: T) => T, resultSelector?: (last: T) => T): T;
+        average(selector?: (element: T) => number): number;
+        count(predicate?: (element: T, index: number) => Boolean): number;
+        max(selector?: (element: T) => number): number;
+        min(selector?: (element: T) => number): number;
+        maxBy(keySelector: (element: T) => T): T;
+        minBy(keySelector: (element: T) => T): T;
+        sum(selector?: (element: T) => number): number;
+        elementAt(index: number): T;
+        elementAtOrDefault(index: number, defaultValue?: T): T;
+        first(predicate?: (element: T, index: number) => Boolean): T;
+        firstOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
+        last(predicate?: (element: T, index: number) => Boolean): T;
+        lastOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
+        single(predicate?: (element: T, index: number) => Boolean): T;
+        singleOrDefault(predicate?: (element: T, index: number) => Boolean, defaultValue?: T): T;
+        skip(count: number): Enumerable<T>;
+        skipWhile(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
+        take(count: number): Enumerable<T>;
+        takeWhile(predicate: (element: T, index: number) => Boolean): Enumerable<T>;
+        takeExceptLast(count?: number): Enumerable<T>;
+        takeFromLast(count: number): Enumerable<T>;
+        indexOf(item: T): number;
+        indexOf(predicate: (element: T, index: number) => Boolean): number;
+        lastIndexOf(item: T): number;
+        lastIndexOf(predicate: (element: T, index: number) => Boolean): number;
+        asEnumerable(): Enumerable<T>;
+        toArray(): T[];
+        toLookup(keySelector: (element: T) => T, elementSelector?: (element: T) => T, compareSelector?: (element: T) => T): Lookup<T>;
+        toObject(keySelector: (element: T) => T, elementSelector?: (element: T) => T): Object;
+        toDictionary<TKey, TValue>(keySelector: (element: T) => TKey, elementSelector: (element: T) => TValue): Dictionary<TKey, TValue>;
+        toJSONString(replacer: (key: string, value: T) => T): string;
+        toJSONString(replacer: T[]): string;
+        toJSONString(replacer: (key: string, value: T) => T, space: T): string;
+        toJSONString(replacer: T[], space: T): string;
+        toJoinedString(separator?: string, selector?: (element: T, index: number) => T): string;
+        doAction(action: (element: T, index: number) => void): Enumerable<T>;
+        doAction(action: (element: T, index: number) => Boolean): Enumerable<T>;
+        forEach(action: (element: T, index: number) => void): void;
+        forEach(action: (element: T) => void): void;
+        forEach(action: (element: T, index: number) => Boolean): void;
+        forEach(action: (element: T) => Boolean): void;
+        write(separator?: string, selector?: (element: T) => T): void;
+        writeLine(selector?: (element: T) => T): void;
+        force(): void;
+        letBind(func: (source: Enumerable<T>) => T[]): Enumerable<T>;
+        letBind(func: (source: Enumerable<T>) => { length: number;[x: number]: T; }): Enumerable<T>;
+        letBind(func: (source: Enumerable<T>) => Enumerable<T>): Enumerable<T>;
+        share(): DisposableEnumerable<T>;
+        memoize(): DisposableEnumerable<T>;
+        catchError(handler: (exception: T) => void): Enumerable<T>;
+        finallyAction(finallyAction: () => void): Enumerable<T>;
+        log(selector?: (element: T) => void): Enumerable<T>;
+        trace(message?: string, selector?: (element: T) => void): Enumerable<T>;
+    }
+
+    interface OrderedEnumerable<T> extends Enumerable<T> {
+        createOrderedEnumerable(keySelector: (element: T) => T, descending: Boolean): OrderedEnumerable<T>;
+        thenBy(keySelector: (element: T) => T): OrderedEnumerable<T>;
+        thenByDescending(keySelector: (element: T) => T): OrderedEnumerable<T>;
+    }
+
+    interface DisposableEnumerable<T> extends Enumerable<T> {
+        dispose(): void;
+    }
+
+    export class Dictionary<TKey, TValue> {
+        constructor();
+
+        add(key: TKey, value: TValue): void;
+        get(key: TKey): TValue;
+        set(key: TKey, value: TValue): Boolean;
+        contains(key: TKey): Boolean;
+        clear(): void;
+        remove(key: TKey): void;
+        count(): number;
+        toEnumerable(): Enumerable<KeyValuePair<TKey, TValue>>;
+    }
+
+    interface KeyValuePair<TKey, TValue> {
+        key: TKey;
+        value: TValue;
+    }
+
+    interface Lookup<T> {
+        count(): number;
+        get(key: T): Enumerable<T>;
+        contains(key: T): Boolean;
+        toEnumerable(): Enumerable<T>;
+    }
+
+    interface Grouping<TKey, TValue> extends Enumerable<TValue> {
+        key(): TKey;
+    }
+}
+
+// export definition
+declare var Enumerable: linqjs.EnumerableStatic;interface MaskedInputOptions {
+}
+
+declare class MaskedInput {
+	constructor(args: MaskedInputOptions);
+}// Type definitions for Moment.js 2.8.0
+// Project: https://github.com/timrwood/moment
+// Definitions by: Michael Lakerveld <https://github.com/Lakerfield>, Aaron King <https://github.com/kingdango>, Hiroki Horiuchi <https://github.com/horiuchi>, Dick van den Brink <https://github.com/DickvdBrink>, Adi Dahiya <https://github.com/adidahiya>
+// Definitions: https://github.com/borisyankov/DefinitelyTyped
+
+declare module moment {
+
+    interface MomentInput {
+
+        years?: number;
+        y?: number;
+
+        months?: number;
+        M?: number;
+
+        weeks?: number;
+        w?: number;
+
+        days?: number;
+        d?: number;
+
+        hours?: number;
+        h?: number;
+
+        minutes?: number;
+        m?: number;
+
+        seconds?: number;
+        s?: number;
+
+        milliseconds?: number;
+        ms?: number;
+
+    }
+
+    interface Duration {
+
+        humanize(withSuffix?: boolean): string;
+
+        as(units: string): number;
+
+        milliseconds(): number;
+        asMilliseconds(): number;
+
+        seconds(): number;
+        asSeconds(): number;
+
+        minutes(): number;
+        asMinutes(): number;
+
+        hours(): number;
+        asHours(): number;
+
+        days(): number;
+        asDays(): number;
+
+        months(): number;
+        asMonths(): number;
+
+        years(): number;
+        asYears(): number;
+
+        add(n: number, p: string): Duration;
+        add(n: number): Duration;
+        add(d: Duration): Duration;
+
+        subtract(n: number, p: string): Duration;
+        subtract(n: number): Duration;
+        subtract(d: Duration): Duration;
+
+        toISOString(): string;
+
+    }
+
+    interface Moment {
+
+        format(format: string): string;
+        format(): string;
+
+        fromNow(withoutSuffix?: boolean): string;
+
+        startOf(unitOfTime: string): Moment;
+        endOf(unitOfTime: string): Moment;
+
+        /**
+         * Mutates the original moment by adding time. (deprecated in 2.8.0)
+         *
+         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
+         * @param amount the amount you want to add
+         */
+        add(unitOfTime: string, amount: number): Moment;
+        /**
+         * Mutates the original moment by adding time.
+         *
+         * @param amount the amount you want to add
+         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
+         */
+        add(amount: number, unitOfTime: string): Moment;
+        /**
+         * Mutates the original moment by adding time. Note that the order of arguments can be flipped.
+         *
+         * @param amount the amount you want to add
+         * @param unitOfTime the unit of time you want to add (eg "years" / "hours" etc)
+         */
+        add(amount: string, unitOfTime: string): Moment;
+        /**
+         * Mutates the original moment by adding time.
+         *
+         * @param objectLiteral an object literal that describes multiple time units {days:7,months:1}
+         */
+        add(objectLiteral: MomentInput): Moment;
+        /**
+         * Mutates the original moment by adding time.
+         *
+         * @param duration a length of time
+         */
+        add(duration: Duration): Moment;
+
+        /**
+         * Mutates the original moment by subtracting time. (deprecated in 2.8.0)
+         *
+         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
+         * @param amount the amount you want to subtract
+         */
+        subtract(unitOfTime: string, amount: number): Moment;
+        /**
+         * Mutates the original moment by subtracting time.
+         *
+         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
+         * @param amount the amount you want to subtract
+         */
+        subtract(amount: number, unitOfTime: string): Moment;
+        /**
+         * Mutates the original moment by subtracting time. Note that the order of arguments can be flipped.
+         *
+         * @param amount the amount you want to add
+         * @param unitOfTime the unit of time you want to subtract (eg "years" / "hours" etc)
+         */
+        subtract(amount: string, unitOfTime: string): Moment;
+        /**
+         * Mutates the original moment by subtracting time.
+         *
+         * @param objectLiteral an object literal that describes multiple time units {days:7,months:1}
+         */
+        subtract(objectLiteral: MomentInput): Moment;
+        /**
+         * Mutates the original moment by subtracting time.
+         *
+         * @param duration a length of time
+         */
+        subtract(duration: Duration): Moment;
+
+        calendar(): string;
+        calendar(start: Moment): string;
+
+        clone(): Moment;
+
+        /**
+         * @return Unix timestamp, or milliseconds since the epoch.
+         */
+        valueOf(): number;
+
+        local(): Moment; // current date/time in local mode
+
+        utc(): Moment; // current date/time in UTC mode
+
+        isValid(): boolean;
+
+        year(y: number): Moment;
+        year(): number;
+        quarter(): number;
+        quarter(q: number): Moment;
+        month(M: number): Moment;
+        month(M: string): Moment;
+        month(): number;
+        day(d: number): Moment;
+        day(d: string): Moment;
+        day(): number;
+        date(d: number): Moment;
+        date(): number;
+        hour(h: number): Moment;
+        hour(): number;
+        hours(h: number): Moment;
+        hours(): number;
+        minute(m: number): Moment;
+        minute(): number;
+        minutes(m: number): Moment;
+        minutes(): number;
+        second(s: number): Moment;
+        second(): number;
+        seconds(s: number): Moment;
+        seconds(): number;
+        millisecond(ms: number): Moment;
+        millisecond(): number;
+        milliseconds(ms: number): Moment;
+        milliseconds(): number;
+        weekday(): number;
+        weekday(d: number): Moment;
+        isoWeekday(): number;
+        isoWeekday(d: number): Moment;
+        weekYear(): number;
+        weekYear(d: number): Moment;
+        isoWeekYear(): number;
+        isoWeekYear(d: number): Moment;
+        week(): number;
+        week(d: number): Moment;
+        weeks(): number;
+        weeks(d: number): Moment;
+        isoWeek(): number;
+        isoWeek(d: number): Moment;
+        isoWeeks(): number;
+        isoWeeks(d: number): Moment;
+        weeksInYear(): number;
+        isoWeeksInYear(): number;
+        dayOfYear(): number;
+        dayOfYear(d: number): Moment;
+
+        from(f: Moment): string;
+        from(f: Moment, suffix: boolean): string;
+        from(d: Date): string;
+        from(s: string): string;
+        from(date: number[]): string;
+
+        diff(b: Moment): number;
+        diff(b: Moment, unitOfTime: string): number;
+        diff(b: Moment, unitOfTime: string, round: boolean): number;
+
+        toArray(): number[];
+        toDate(): Date;
+        toISOString(): string;
+        toJSON(): string;
+        unix(): number;
+
+        isLeapYear(): boolean;
+        zone(): number;
+        zone(b: number): Moment;
+        zone(b: string): Moment;
+        daysInMonth(): number;
+        isDST(): boolean;
+
+        isBefore(): boolean;
+        isBefore(b: Moment): boolean;
+        isBefore(b: string): boolean;
+        isBefore(b: Number): boolean;
+        isBefore(b: Date): boolean;
+        isBefore(b: number[]): boolean;
+        isBefore(b: Moment, granularity: string): boolean;
+        isBefore(b: String, granularity: string): boolean;
+        isBefore(b: Number, granularity: string): boolean;
+        isBefore(b: Date, granularity: string): boolean;
+        isBefore(b: number[], granularity: string): boolean;
+
+        isAfter(): boolean;
+        isAfter(b: Moment): boolean;
+        isAfter(b: string): boolean;
+        isAfter(b: Number): boolean;
+        isAfter(b: Date): boolean;
+        isAfter(b: number[]): boolean;
+        isAfter(b: Moment, granularity: string): boolean;
+        isAfter(b: String, granularity: string): boolean;
+        isAfter(b: Number, granularity: string): boolean;
+        isAfter(b: Date, granularity: string): boolean;
+        isAfter(b: number[], granularity: string): boolean;
+
+        isSame(b: Moment): boolean;
+        isSame(b: string): boolean;
+        isSame(b: Number): boolean;
+        isSame(b: Date): boolean;
+        isSame(b: number[]): boolean;
+        isSame(b: Moment, granularity: string): boolean;
+        isSame(b: String, granularity: string): boolean;
+        isSame(b: Number, granularity: string): boolean;
+        isSame(b: Date, granularity: string): boolean;
+        isSame(b: number[], granularity: string): boolean;
+
+        // Deprecated as of 2.8.0.
+        lang(language: string): Moment;
+        lang(reset: boolean): Moment;
+        lang(): MomentLanguage;
+
+        locale(language: string): Moment;
+        locale(reset: boolean): Moment;
+        locale(): string;
+
+        localeData(language: string): Moment;
+        localeData(reset: boolean): Moment;
+        localeData(): MomentLanguage;
+
+        // Deprecated as of 2.7.0.
+        max(date: Date): Moment;
+        max(date: number): Moment;
+        max(date: any[]): Moment;
+        max(date: string): Moment;
+        max(date: string, format: string): Moment;
+        max(clone: Moment): Moment;
+
+        // Deprecated as of 2.7.0.
+        min(date: Date): Moment;
+        min(date: number): Moment;
+        min(date: any[]): Moment;
+        min(date: string): Moment;
+        min(date: string, format: string): Moment;
+        min(clone: Moment): Moment;
+
+        get(unit: string): number;
+        set(unit: string, value: number): Moment;
+
+    }
+
+    interface MomentCalendar {
+
+		lastDay: any;
+		sameDay: any;
+		nextDay: any;
+		lastWeek: any;
+		nextWeek: any;
+		sameElse: any;
+
+    }
+
+    interface MomentLanguage {
+
+		months?: any;
+		monthsShort?: any;
+		weekdays?: any;
+		weekdaysShort?: any;
+		weekdaysMin?: any;
+		longDateFormat?: MomentLongDateFormat;
+		relativeTime?: MomentRelativeTime;
+		meridiem?: (hour: number, minute: number, isLowercase: boolean) => string;
+		calendar?: MomentCalendar;
+		ordinal?: (num: number) => string;
+
+    }
+
+    interface MomentLongDateFormat {
+
+		L: string;
+		LL: string;
+		LLL: string;
+		LLLL: string;
+		LT: string;
+		l?: string;
+		ll?: string;
+		lll?: string;
+		llll?: string;
+		lt?: string;
+
+    }
+
+    interface MomentRelativeTime {
+
+		future: any;
+		past: any;
+		s: any;
+		m: any;
+		mm: any;
+		h: any;
+		hh: any;
+		d: any;
+		dd: any;
+		M: any;
+		MM: any;
+		y: any;
+		yy: any;
+
+    }
+
+    interface MomentStatic {
+
+        version: string;
+
+        (): Moment;
+        (date: number): Moment;
+        (date: number[]): Moment;
+        (date: string, format?: string, strict?: boolean): Moment;
+        (date: string, format?: string, language?: string, strict?: boolean): Moment;
+        (date: string, formats: string[], strict?: boolean): Moment;
+        (date: string, formats: string[], language?: string, strict?: boolean): Moment;
+        (date: string, specialFormat: () => void, strict?: boolean): Moment;
+        (date: string, specialFormat: () => void, language?: string, strict?: boolean): Moment;
+        (date: string, formatsIncludingSpecial: any[], strict?: boolean): Moment;
+        (date: string, formatsIncludingSpecial: any[], language?: string, strict?: boolean): Moment;
+        (date: Date): Moment;
+        (date: Moment): Moment;
+        (date: Object): Moment;
+
+        utc(): Moment;
+        utc(date: number): Moment;
+        utc(date: number[]): Moment;
+        utc(date: string, format?: string, strict?: boolean): Moment;
+        utc(date: string, format?: string, language?: string, strict?: boolean): Moment;
+        utc(date: string, formats: string[], strict?: boolean): Moment;
+        utc(date: string, formats: string[], language?: string, strict?: boolean): Moment;
+        utc(date: Date): Moment;
+        utc(date: Moment): Moment;
+        utc(date: Object): Moment;
+
+        unix(timestamp: number): Moment;
+
+        invalid(parsingFlags?: Object): Moment;
+        isMoment(): boolean;
+        isMoment(m: any): boolean;
+        isDuration(): boolean;
+        isDuration(d: any): boolean;
+
+        // Deprecated in 2.8.0.
+        lang(language?: string): string;
+        lang(language?: string, definition?: MomentLanguage): string;
+
+        locale(language?: string): string;
+        locale(language?: string[]): string;
+        locale(language?: string, definition?: MomentLanguage): string;
+
+        localeData(language?: string): MomentLanguage;
+
+        longDateFormat: any;
+        relativeTime: any;
+        meridiem: (hour: number, minute: number, isLowercase: boolean) => string;
+        calendar: any;
+        ordinal: (num: number) => string;
+
+        duration(milliseconds: Number): Duration;
+        duration(num: Number, unitOfTime: string): Duration;
+        duration(input: MomentInput): Duration;
+        duration(object: any): Duration;
+        duration(): Duration;
+
+        parseZone(date: string): Moment;
+
+        months(): string[];
+        months(index: number): string;
+        months(format: string): string[];
+        months(format: string, index: number): string;
+        monthsShort(): string[];
+        monthsShort(index: number): string;
+        monthsShort(format: string): string[];
+        monthsShort(format: string, index: number): string;
+
+        weekdays(): string[];
+        weekdays(index: number): string;
+        weekdays(format: string): string[];
+        weekdays(format: string, index: number): string;
+        weekdaysShort(): string[];
+        weekdaysShort(index: number): string;
+        weekdaysShort(format: string): string[];
+        weekdaysShort(format: string, index: number): string;
+        weekdaysMin(): string[];
+        weekdaysMin(index: number): string;
+        weekdaysMin(format: string): string[];
+        weekdaysMin(format: string, index: number): string;
+
+        min(moments: Moment[]): Moment;
+        max(moments: Moment[]): Moment;
+
+        normalizeUnits(unit: string): string;
+        relativeTimeThreshold(threshold: string, limit: number): void;
+
+        /**
+         * Constant used to enable explicit ISO_8601 format parsing.
+         */
+        ISO_8601(): void;
+
+    }
+
+}
+
+declare var moment: moment.MomentStatic;
+
+declare module 'moment' {
+    export = moment;
+}declare module Vidyano {
+    export interface Route {
+        enter(fnc: Function): Route;
+        to(fnc: Function): Route;
+        exit(fnc: Function): Route;
+        params: any;
+        path: string;
+    }
+
+    export interface PathRescueArguments {
+        current: string;
+    }
+
+    export interface PathArguments {
+        path: string;
+        params: { [key: string]: string };
+    }
+
+    export interface PathStatic {
+        map(path: string): Route;
+        root(path: string): void;
+        routes: {
+            current: string;
+            defined: {
+                [key: string]: Route
+            };
+        };
+        listen(): void;
+        rescue(fnc: Function): void;
+        history: {
+            pushState(state: any, title: string, path: string);
+            replaceState(state: any, title: string, path: string);
+            listen();
+        };
+        match(path: string, parameterize: boolean): Route;
+    }
+
+    export var Path: PathStatic;
+}interface PolymerProperty {
+    type: ObjectConstructor | StringConstructor | BooleanConstructor | DateConstructor | NumberConstructor | ArrayConstructor;
+    computed?: string;
+    reflectToAttribute?: boolean;
+    readOnly?: boolean;
+    observer?: string;
+    value?: number | boolean | string | Function;
+    notify?: boolean;
+}
+
+interface PolymerProperties {
+    [name: string]: ObjectConstructor | StringConstructor | BooleanConstructor | DateConstructor | NumberConstructor | ArrayConstructor | PolymerProperty;
+}
+
+interface PolymerDomApiClassList {
+    add(className: string): void;
+    remove(className: string): void;
+    toggle(className: string): void;
+}
+
+interface PolymerDomApi {
+    getDistributedNodes(): HTMLElement[];
+    getDestinationInsertionPoints(): HTMLElement[];
+    flush(): void;
+    childNodes: Node[];
+    children: HTMLElement[];
+    classList: PolymerDomApiClassList;
+    firstChild: Node;
+    firstElementChild: Element;
+    innerHTML: string;
+    lastChild: Node;
+    lastElementChild: Element;
+    nextElementSibling: Element;
+    nextSibling: Node;
+    node: Node;
+    parentNode: Node;
+    previousElementSibling: Element;
+    previousSibling: Node;
+    textContent: string;
+    insertBefore(newChild: Node | Vidyano.WebComponents.WebComponent, refChild?: Node | Vidyano.WebComponents.WebComponent): Node;
+    removeAttribute(name?: string): void;
+    setAttribute(name?: string, value?: string): void;
+    querySelector(selectors: string): Node | HTMLElement | Vidyano.WebComponents.WebComponent;
+    querySelectorAll(selectors: string): NodeList;
+    appendChild(newChild: Node | Vidyano.WebComponents.WebComponent): Node | Vidyano.WebComponents.WebComponent;
+    removeChild(oldChild: Node | Vidyano.WebComponents.WebComponent): Node | Vidyano.WebComponents.WebComponent;
+    replaceChild(newChild: Node | Vidyano.WebComponents.WebComponent, oldChild: Node | Vidyano.WebComponents.WebComponent): Node;
+    getEffectiveChildNodes(): Node[];
+    observeNodes(callBack: (info: PolymerDomChangedInfo) => void): PolymerDomChangeObserver;
+    unobserveNodes(observer: PolymerDomChangeObserver);
+}
+
+interface PolymerDomChangedInfo {
+    addedNodes: Node;
+    removedNodes: Node;
+}
+
+interface PolymerDomChangeObserver {
+}
+
+interface PolymerTrackEvent extends CustomEvent {
+    detail: {
+        sourceEvent?: Event;
+    }
+}
+
+interface PolymerTrackDetail {
+    /**
+    state - a string indicating the tracking state:
+        - start - fired when tracking is first detected (finger/button down and moved past a pre-set distance threshold)
+        - track - fired while tracking
+        - end - fired when tracking ends
+    */
+    state: string;
+    /** clientX coordinate for event */
+    x: number;
+    /** clientY coordinate for event */
+    y: number;
+    /** change in pixels horizontally since the first track event */
+    dx: number;
+    /** change in pixels vertically since the first track event */
+    dy: number;
+    /** change in pixels horizontally since last track event */
+    ddx: number;
+    /** change in pixels vertically since last track event */
+    ddy: number;
+    /** a function that may be called to determine the element currently being hovered */
+    hover(): Element | Vidyano.WebComponents.WebComponent;
+}
+
+interface PolymerTemplate extends Node {
+    stamp: (model: any) => TemplateInstance;
+}
+
+interface TemplateInstance {
+    item: any;
+    index: number;
+    root: DocumentFragment;
+}
+
+interface TapEvent extends CustomEvent {
+    detail: {
+        x: number;
+        y: number;
+        sourceEvent: Event;
+    };
+
+    model?: TemplateInstance | any;
+}
+
+interface PolymerGestures {
+    add: (node: HTMLElement, eventName: string, handler: Function) => void;
+    remove: (node: HTMLElement, eventName: string, handler: Function) => void;
+}
+
+declare var Polymer: {
+    (polymer: any): any;
+    dom(element: Node | Vidyano.WebComponents.WebComponent): PolymerDomApi;
+    getRegisteredPrototype(tagName: string): any;
+
+    /**
+     * Returns true if the element is a Polymer web component.
+     */
+    isInstance(element: HTMLElement): boolean;
+
+    whenReady(callback: () => void): void;
+
+    /**
+     * no-operation function for handy stubs
+     */
+    nop(): void;
+
+    api: any;
+
+    Gestures: PolymerGestures;
+};
+declare var CustomElements: {
+    registry: {
+        [tag: string]: {
+            ctor: any;
+        }
+    }
+
+    ready: boolean;
+    useNative: boolean;
+};
+declare class Queue {
+    constructor(maxConcurrentPromises: number, maxQueuedPromises?: number);
+    add<T>(work: () => Promise<T>): Promise<T>;
+    getQueueLength(): number;
+}
+// Type definitions for QUnit v1.16
+// Project: http://qunitjs.com/
+// Definitions by: Diullei Gomes <https://github.com/diullei>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+
+interface DoneCallbackObject {
+    /**
+    * The number of failed assertions
+    */
+    failed: number;
+
+    /**
+    * The number of passed assertions
+    */
+    passed: number;
+
+    /**
+    * The total number of assertions
+    */
+    total: number;
+
+    /**
+    * The time in milliseconds it took tests to run from start to finish.
+    */
+    runtime: number;
+}
+
+interface LogCallbackObject {
+    /**
+    * The boolean result of an assertion, true means passed, false means failed.
+    */
+    result: boolean;
+
+    /**
+    * One side of a comparision assertion. Can be undefined when ok() is used.
+    */
+    actual: Object;
+
+    /**
+    * One side of a comparision assertion. Can be undefined when ok() is used.
+    */
+    expected: Object;
+
+    /**
+    * A string description provided by the assertion.
+    */
+    message: string;
+
+    /**
+    * The associated stacktrace, either from an exception or pointing to the source
+    * of the assertion. Depends on browser support for providing stacktraces, so can be
+    * undefined.
+    */
+    source: string;
+}
+
+interface ModuleStartCallbackObject {
+    /**
+    * Name of the next module to run
+    */
+    name: string;
+}
+
+interface ModuleDoneCallbackObject {
+    /**
+    * Name of this module
+    */
+    name: string;
+
+    /**
+    * The number of failed assertions
+    */
+    failed: number;
+
+    /**
+    * The number of passed assertions
+    */
+    passed: number;
+
+    /**
+    * The total number of assertions
+    */
+    total: number;
+}
+
+interface TestDoneCallbackObject {
+    /**
+    * TName of the next test to run
+    */
+    name: string;
+
+    /**
+    * Name of the current module
+    */
+    module: string;
+
+    /**
+    * The number of failed assertions
+    */
+    failed: number;
+
+    /**
+    * The number of passed assertions
+    */
+    passed: number;
+
+    /**
+    * The total number of assertions
+    */
+    total: number;
+
+    /**
+    * The total runtime, including setup and teardown
+    */
+    duration: number;
+}
+
+interface TestStartCallbackObject {
+    /**
+    * Name of the next test to run
+    */
+    name: string;
+
+    /**
+    * Name of the current module
+    */
+    module: string;
+}
+
+interface Config {
+    altertitle: boolean;
+    autostart: boolean;
+    current: Object;
+    reorder: boolean;
+    requireExpects: boolean;
+    testTimeout: number;
+    urlConfig: Array<URLConfigItem>;
+    done: any;
+}
+
+interface URLConfigItem {
+    id: string;
+    label: string;
+    tooltip: string;
+}
+
+interface LifecycleObject {
+    /**
+     * Runs before each test
+     * @param assert
+     * @deprecated
+     */
+    setup?: (assert: QUnitAssert) => void;
+
+    /**
+     * Runs after each test
+     * @param assert
+     * @deprecated
+     */
+    teardown?: (assert: QUnitAssert) => void;
+    /**
+     * Runs before each test
+     * @param assert
+     */
+    beforeEach?: (assert: QUnitAssert) => void;
+    /**
+     * Runs after each test
+     * @param assert
+     */
+    afterEach?: (assert: QUnitAssert) => void;
+
+    /**
+     * Any additional properties on the hooks object will be added to that context.
+     */
+    [property: string]: any;
+}
+
+interface QUnitAssert {
+    /* ASSERT */
+    assert: any;
+    current_testEnvironment: any;
+    jsDump: any;
+
+    /**
+    * Instruct QUnit to wait for an asynchronous operation.
+    *
+    * When your test has any asynchronous exit points, call assert.async() to get a unique
+    * resolution callback for each async operation. The callback returned from assert.async()
+    * will throw an Error if is invoked more than once.
+    */
+    async(): () => void;
+
+    /**
+    * A deep recursive comparison assertion, working on primitive types, arrays, objects,
+    * regular expressions, dates and functions.
+    *
+    * The deepEqual() assertion can be used just like equal() when comparing the value of
+    * objects, such that { key: value } is equal to { key: value }. For non-scalar values,
+    * identity will be disregarded by deepEqual.
+    *
+    * @param actual Object or Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    deepEqual(actual: any, expected: any, message?: string): any;
+
+    /**
+    * A non-strict comparison assertion, roughly equivalent to JUnit assertEquals.
+    *
+    * The equal assertion uses the simple comparison operator (==) to compare the actual
+    * and expected arguments. When they are equal, the assertion passes: any; otherwise, it fails.
+    * When it fails, both actual and expected values are displayed in the test result,
+    * in addition to a given message.
+    *
+    * @param actual Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    equal(actual: any, expected: any, message?: string): any;
+
+    /**
+    * Specify how many assertions are expected to run within a test.
+    *
+    * To ensure that an explicit number of assertions are run within any test, use
+    * expect( number ) to register an expected count. If the number of assertions
+    * run does not match the expected count, the test will fail.
+    *
+    * @param amount Number of assertions in this test.
+    */
+    expect(amount: number): any;
+
+    /**
+    * An inverted deep recursive comparison assertion, working on primitive types,
+    * arrays, objects, regular expressions, dates and functions.
+    *
+    * The notDeepEqual() assertion can be used just like equal() when comparing the
+    * value of objects, such that { key: value } is equal to { key: value }. For non-scalar
+    * values, identity will be disregarded by notDeepEqual.
+    *
+    * @param actual Object or Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    notDeepEqual(actual: any, expected: any, message?: string): any;
+
+    /**
+    * A non-strict comparison assertion, checking for inequality.
+    *
+    * The notEqual assertion uses the simple inverted comparison operator (!=) to compare
+    * the actual and expected arguments. When they aren't equal, the assertion passes: any;
+    * otherwise, it fails. When it fails, both actual and expected values are displayed
+    * in the test result, in addition to a given message.
+    *
+    * @param actual Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    notEqual(actual: any, expected: any, message?: string): any;
+
+    notPropEqual(actual: any, expected: any, message?: string): any;
+
+    propEqual(actual: any, expected: any, message?: string): any;
+
+    /**
+    * A non-strict comparison assertion, checking for inequality.
+    *
+    * The notStrictEqual assertion uses the strict inverted comparison operator (!==)
+    * to compare the actual and expected arguments. When they aren't equal, the assertion
+    * passes: any; otherwise, it fails. When it fails, both actual and expected values are
+    * displayed in the test result, in addition to a given message.
+    *
+    * @param actual Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    notStrictEqual(actual: any, expected: any, message?: string): any;
+
+    /**
+    * A boolean assertion, equivalent to CommonJS’s assert.ok() and JUnit’s assertTrue().
+    * Passes if the first argument is truthy.
+    *
+    * The most basic assertion in QUnit, ok() requires just one argument. If the argument
+    * evaluates to true, the assertion passes; otherwise, it fails. If a second message
+    * argument is provided, it will be displayed in place of the result.
+    *
+    * @param state Expression being tested
+    * @param message A short description of the assertion
+    */
+    ok(state: any, message?: string): any;
+
+    /**
+    * A strict type and value comparison assertion.
+    *
+    * The strictEqual() assertion provides the most rigid comparison of type and value with
+    * the strict equality operator (===)
+    *
+    * @param actual Expression being tested
+    * @param expected Known comparison value
+    * @param message A short description of the assertion
+    */
+    strictEqual(actual: any, expected: any, message?: string): any;
+
+    /**
+    * Assertion to test if a callback throws an exception when run.
+    *
+    * When testing code that is expected to throw an exception based on a specific set of
+    * circumstances, use throws() to catch the error object for testing and comparison.
+    *
+    * @param block Function to execute
+    * @param expected Error Object to compare
+    * @param message A short description of the assertion
+    */
+    throws(block: () => any, expected: any, message?: string): any;
+
+    /**
+    * @param block Function to execute
+    * @param message A short description of the assertion
+    */
+    throws(block: () => any, message?: string): any;
+
+    /**
+    * Alias of throws.
+    *
+    * In very few environments, like Closure Compiler, throws is considered a reserved word
+    * and will cause an error. For that case, an alias is bundled called raises. It has the
+    * same signature and behaviour, just a different name.
+    *
+    * @param block Function to execute
+    * @param expected Error Object to compare
+    * @param message A short description of the assertion
+    */
+    raises(block: () => any, expected: any, message?: string): any;
+
+    /**
+    * Alias of throws.
+    *
+    * In very few environments, like Closure Compiler, throws is considered a reserved word
+    * and will cause an error. For that case, an alias is bundled called raises. It has the
+    * same signature and behaviour, just a different name.
+    *
+    * @param block Function to execute
+    * @param message A short description of the assertion
+    */
+    raises(block: () => any, message?: string): any;
+}
+
+interface QUnitStatic extends QUnitAssert {
+    /* ASYNC CONTROL */
+
+    /**
+    * Start running tests again after the testrunner was stopped. See stop().
+    *
+    * When your async test has multiple exit points, call start() for the corresponding number of stop() increments.
+    *
+    * @param decrement Optional argument to merge multiple start() calls into one. Use with multiple corrsponding stop() calls.
+    */
+    start(decrement?: number): any;
+
+    /**
+    * Stop the testrunner to wait for async tests to run. Call start() to continue.
+    *
+    * When your async test has multiple exit points, call stop() with the increment argument, corresponding to the number of start() calls you need.
+    *
+    * On Blackberry 5.0, window.stop is a native read-only function. If you deal with that browser, use QUnit.stop() instead, which will work anywhere.
+    *
+    * @param decrement Optional argument to merge multiple stop() calls into one. Use with multiple corrsponding start() calls.
+    */
+    stop(increment?: number): any;
+
+    /* CALLBACKS */
+
+    /**
+    * Register a callback to fire whenever the test suite begins.
+    *
+    * QUnit.begin() is called once before running any tests. (a better would've been QUnit.start,
+    * but thats already in use elsewhere and can't be changed.)
+    *
+    * @param callback Callback to execute
+    */
+    begin(callback: () => any): any;
+
+    /**
+    * Register a callback to fire whenever the test suite ends.
+    *
+    * @param callback Callback to execute.
+    */
+    done(callback: (details: DoneCallbackObject) => any): any;
+
+    /**
+    * Register a callback to fire whenever an assertion completes.
+    *
+    * This is one of several callbacks QUnit provides. Its intended for integration scenarios like
+    * PhantomJS or Jenkins. The properties of the details argument are listed below as options.
+    *
+    * @param callback Callback to execute.
+    */
+    log(callback: (details: LogCallbackObject) => any): any;
+
+    /**
+    * Register a callback to fire whenever a module ends.
+    *
+    * @param callback Callback to execute.
+    */
+    moduleDone(callback: (details: ModuleDoneCallbackObject) => any): any;
+
+    /**
+    * Register a callback to fire whenever a module begins.
+    *
+    * @param callback Callback to execute.
+    */
+    moduleStart(callback: (details: ModuleStartCallbackObject) => any): any;
+
+    /**
+    * Register a callback to fire whenever a test ends.
+    *
+    * @param callback Callback to execute.
+    */
+    testDone(callback: (details: TestDoneCallbackObject) => any): any;
+
+    /**
+    * Register a callback to fire whenever a test begins.
+    *
+    * @param callback Callback to execute.
+    */
+    testStart(callback: (details: TestStartCallbackObject) => any): any;
+
+    /* CONFIGURATION */
+
+    /**
+    * QUnit has a bunch of internal configuration defaults, some of which are
+    * useful to override. Check the description for each option for details.
+    */
+    config: Config;
+
+    /* TEST */
+
+    /**
+    * Add an asynchronous test to run. The test must include a call to start().
+    *
+    * For testing asynchronous code, asyncTest will automatically stop the test runner
+    * and wait for your code to call start() to continue.
+    *
+    * @param name Title of unit being tested
+    * @param expected Number of assertions in this test
+    * @param test Function to close over assertions
+    */
+    asyncTest(name: string, expected: number, test: (assert: QUnitAssert) => any): any;
+
+    /**
+    * Add an asynchronous test to run. The test must include a call to start().
+    *
+    * For testing asynchronous code, asyncTest will automatically stop the test runner
+    * and wait for your code to call start() to continue.
+    *
+    * @param name Title of unit being tested
+    * @param test Function to close over assertions
+    */
+    asyncTest(name: string, test: (assert: QUnitAssert) => any): any;
+
+    /**
+    * Specify how many assertions are expected to run within a test.
+    *
+    * To ensure that an explicit number of assertions are run within any test, use
+    * expect( number ) to register an expected count. If the number of assertions
+    * run does not match the expected count, the test will fail.
+    *
+    * @param amount Number of assertions in this test.
+    * @depricated since version 1.16
+    */
+    expect(amount: number): any;
+
+    /**
+    * Group related tests under a single label.
+    *
+    * All tests that occur after a call to module() will be grouped into that module.
+    * The test names will all be preceded by the module name in the test results.
+    * You can then use that module name to select tests to run.
+    *
+    * @param name Label for this group of tests
+    * @param lifecycle Callbacks to run before and after each test
+    */
+    module(name: string, lifecycle?: LifecycleObject): any;
+
+    /**
+    * Add a test to run.
+    *
+    * When testing the most common, synchronous code, use test().
+    * The assert argument to the callback contains all of QUnit's assertion methods.
+    * If you are avoiding using any of QUnit's globals, you can use the assert
+    * argument instead.
+    *
+    * @param title Title of unit being tested
+    * @param expected Number of assertions in this test
+    * @param test Function to close over assertions
+    */
+    test(title: string, expected: number, test: (assert: QUnitAssert) => any): any;
+
+    /**
+    * @param title Title of unit being tested
+    * @param test Function to close over assertions
+    */
+    test(title: string, test: (assert: QUnitAssert) => any): any;
+
+    /**
+    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L1568
+    */
+    equiv(a: any, b: any): any;
+
+    /**
+    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L897
+    */
+    push(result: any, actual: any, expected: any, message: string): any;
+
+    /**
+    * https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L839
+    */
+    reset(): any;
+}
+
+/* ASSERT */
+
+/**
+* A deep recursive comparison assertion, working on primitive types, arrays, objects,
+* regular expressions, dates and functions.
+*
+* The deepEqual() assertion can be used just like equal() when comparing the value of
+* objects, such that { key: value } is equal to { key: value }. For non-scalar values,
+* identity will be disregarded by deepEqual.
+*
+* @param actual Object or Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function deepEqual(actual: any, expected: any, message?: string): any;
+
+/**
+* A non-strict comparison assertion, roughly equivalent to JUnit assertEquals.
+*
+* The equal assertion uses the simple comparison operator (==) to compare the actual
+* and expected arguments. When they are equal, the assertion passes: any; otherwise, it fails.
+* When it fails, both actual and expected values are displayed in the test result,
+* in addition to a given message.
+*
+* @param actual Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function equal(actual: any, expected: any, message?: string): any;
+
+/**
+* An inverted deep recursive comparison assertion, working on primitive types,
+* arrays, objects, regular expressions, dates and functions.
+*
+* The notDeepEqual() assertion can be used just like equal() when comparing the
+* value of objects, such that { key: value } is equal to { key: value }. For non-scalar
+* values, identity will be disregarded by notDeepEqual.
+*
+* @param actual Object or Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function notDeepEqual(actual: any, expected: any, message?: string): any;
+
+/**
+* A non-strict comparison assertion, checking for inequality.
+*
+* The notEqual assertion uses the simple inverted comparison operator (!=) to compare
+* the actual and expected arguments. When they aren't equal, the assertion passes;
+* otherwise, it fails. When it fails, both actual and expected values are displayed
+* in the test result, in addition to a given message.
+*
+* @param actual Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function notEqual(actual: any, expected: any, message?: string): any;
+
+/**
+* A non-strict comparison assertion, checking for inequality.
+*
+* The notStrictEqual assertion uses the strict inverted comparison operator (!==)
+* to compare the actual and expected arguments. When they aren't equal, the assertion
+* passes; otherwise, it fails. When it fails, both actual and expected values are
+* displayed in the test result, in addition to a given message.
+*
+* @param actual Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function notStrictEqual(actual: any, expected: any, message?: string): any;
+
+/**
+* A boolean assertion, equivalent to CommonJS’s assert.ok() and JUnit’s assertTrue().
+* Passes if the first argument is truthy.
+*
+* The most basic assertion in QUnit, ok() requires just one argument. If the argument
+* evaluates to true, the assertion passes; otherwise, it fails. If a second message
+* argument is provided, it will be displayed in place of the result.
+*
+* @param state Expression being tested
+* @param message A short description of the assertion
+*/
+declare function ok(state: any, message?: string): any;
+
+/**
+* A strict type and value comparison assertion.
+*
+* The strictEqual() assertion provides the most rigid comparison of type and value with
+* the strict equality operator (===)
+*
+* @param actual Expression being tested
+* @param expected Known comparison value
+* @param message A short description of the assertion
+*/
+declare function strictEqual(actual: any, expected: any, message?: string): any;
+
+/**
+* Assertion to test if a callback throws an exception when run.
+*
+* When testing code that is expected to throw an exception based on a specific set of
+* circumstances, use throws() to catch the error object for testing and comparison.
+*
+* @param block Function to execute
+* @param expected Error Object to compare
+* @param message A short description of the assertion
+*/
+declare function throws(block: () => any, expected: any, message?: string): any;
+
+/**
+* @param block Function to execute
+* @param message A short description of the assertion
+*/
+declare function throws(block: () => any, message?: string): any;
+
+/* ASYNC CONTROL */
+
+/**
+* Start running tests again after the testrunner was stopped. See stop().
+*
+* When your async test has multiple exit points, call start() for the corresponding number of stop() increments.
+*
+* @param decrement Optional argument to merge multiple start() calls into one. Use with multiple corrsponding stop() calls.
+*/
+declare function start(decrement?: number): any;
+
+/**
+* Stop the testrunner to wait for async tests to run. Call start() to continue.
+*
+* When your async test has multiple exit points, call stop() with the increment argument, corresponding to the number of start() calls you need.
+*
+* On Blackberry 5.0, window.stop is a native read-only function. If you deal with that browser, use QUnit.stop() instead, which will work anywhere.
+*
+* @param decrement Optional argument to merge multiple stop() calls into one. Use with multiple corrsponding start() calls.
+*/
+declare function stop(increment?: number): any;
+
+/* CALLBACKS */
+
+/**
+* Register a callback to fire whenever the test suite begins.
+*
+* QUnit.begin() is called once before running any tests. (a better would've been QUnit.start,
+* but thats already in use elsewhere and can't be changed.)
+*
+* @param callback Callback to execute
+*/
+declare function begin(callback: () => any): any;
+
+/**
+* Register a callback to fire whenever the test suite ends.
+*
+* @param callback Callback to execute.
+*/
+declare function done(callback: (details: DoneCallbackObject) => any): any;
+
+/**
+* Register a callback to fire whenever an assertion completes.
+*
+* This is one of several callbacks QUnit provides. Its intended for integration scenarios like
+* PhantomJS or Jenkins. The properties of the details argument are listed below as options.
+*
+* @param callback Callback to execute.
+*/
+declare function log(callback: (details: LogCallbackObject) => any): any;
+
+/**
+* Register a callback to fire whenever a module ends.
+*
+* @param callback Callback to execute.
+*/
+declare function moduleDone(callback: (details: ModuleDoneCallbackObject) => any): any;
+
+/**
+* Register a callback to fire whenever a module begins.
+*
+* @param callback Callback to execute.
+*/
+declare function moduleStart(callback: (name: string) => any): any;
+
+/**
+* Register a callback to fire whenever a test ends.
+*
+* @param callback Callback to execute.
+*/
+declare function testDone(callback: (details: TestDoneCallbackObject) => any): any;
+
+/**
+* Register a callback to fire whenever a test begins.
+*
+* @param callback Callback to execute.
+*/
+declare function testStart(callback: (details: TestStartCallbackObject) => any): any;
+
+/* TEST */
+
+/**
+* Add an asynchronous test to run. The test must include a call to start().
+*
+* For testing asynchronous code, asyncTest will automatically stop the test runner
+* and wait for your code to call start() to continue.
+*
+* @param name Title of unit being tested
+* @param expected Number of assertions in this test
+* @param test Function to close over assertions
+*/
+declare function asyncTest(name: string, expected?: any, test?: (assert: QUnitAssert) => any): any;
+
+/**
+* Add an asynchronous test to run. The test must include a call to start().
+*
+* For testing asynchronous code, asyncTest will automatically stop the test runner
+* and wait for your code to call start() to continue.
+*
+* @param name Title of unit being tested
+* @param test Function to close over assertions
+*/
+declare function asyncTest(name: string, test: (assert: QUnitAssert) => any): any;
+
+/**
+* Specify how many assertions are expected to run within a test.
+*
+* To ensure that an explicit number of assertions are run within any test, use
+* expect( number ) to register an expected count. If the number of assertions
+* run does not match the expected count, the test will fail.
+*
+* @param amount Number of assertions in this test.
+* @depricated since version 1.16
+*/
+declare function expect(amount: number): any;
+
+// ** conflict with TypeScript module keyword. Must be used on QUnit namespace
+//declare var module: (name: string, lifecycle?: LifecycleObject) => any;
+
+/**
+* Add a test to run.
+*
+* When testing the most common, synchronous code, use test().
+* The assert argument to the callback contains all of QUnit's assertion methods.
+* If you are avoiding using any of QUnit's globals, you can use the assert
+* argument instead.
+*
+* @param title Title of unit being tested
+* @param expected Number of assertions in this test
+* @param test Function to close over assertions
+*/
+declare function test(title: string, expected: number, test: (assert?: QUnitAssert) => any): any;
+
+/**
+* @param title Title of unit being tested
+* @param test Function to close over assertions
+*/
+declare function test(title: string, test: (assert?: QUnitAssert) => any): any;
+
+declare function notPropEqual(actual: any, expected: any, message?: string): any;
+
+declare function propEqual(actual: any, expected: any, message?: string): any;
+
+// https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L1568
+declare function equiv(a: any, b: any): any;
+
+// https://github.com/jquery/qunit/blob/master/qunit/qunit.js#L661
+declare var raises: any;
+
+/* QUNIT */
+declare var QUnit: QUnitStatic;interface ISortable {
+	destroy(): void;
+	option(name: string, value?: any): any;
+}
+
+interface SortableOptions {
+	group?: string;
+	handle?: string;
+	ghostClass?: string;
+	draggable?: string;
+	animation?: number;
+	onSort?: Function;
+}
+
+interface SortableStatic {
+    create(el: HTMLElement | Node, options?: SortableOptions): ISortable;
+}
+
+declare var Sortable: SortableStatic;/* tslint:disable:interface-name */
+interface String {
+    asDataUri(): string;
+    contains(str: string): boolean;
+    endsWith(suffix: string): boolean;
+    insert(str: string, index: number): string;
+    padLeft(width: number, str?: string): string;
+    padRight(width: number, str?: string): string;
+    startsWith(prefix: string): boolean;
+    trimEnd(c: string): string;
+    trimStart(c: string): string;
+    localeFormat(format: string, useDefault: boolean): string;
+}
+
+interface Date {
+    netType(value: string);
+    netType(): string;
+
+    netOffset(value: string);
+    netOffset(): string;
+}
+
+interface Number {
+	format(format: string): string;
+}
+
+interface ExpressionParserStatic {
+    alwaysTrue: (count: number) => boolean;
+    get(expression: string): (count: number) => boolean;
+}
+
+declare var ExpressionParser: ExpressionParserStatic;
+
+interface UniqueStatic {
+    get(): string;
+}
+
+declare var Unique: UniqueStatic;
+
+interface StringEx {
+    isNullOrEmpty(str: string): boolean;
+    isNullOrWhiteSpace(str: string): boolean;
+    format(format: string, ...args: any[]): string;
+}
+
+declare var StringEx: StringEx;
+
+
+interface BooleanEx {
+    parse(str: string): boolean;
+}
+
+declare var BooleanEx: BooleanEx;
+
+interface Array<T> {
+    remove(s: T): boolean;
+    removeAll(f: (t: T) => boolean, thisObject?: any): void;
+}
+
+interface BigNumber {
+    toNumber(): number;
+    equals(value: BigNumber): boolean;
+}
+
+declare var BigNumber: {
+    new (number: number | string): BigNumber;
+};
+/* tslint:enable:interface-name */declare var unwrap: <TNode extends Node>(node: TNode) => TNode;
+
+interface Node {
+    /**
+    * Appends the WebComponent to this component.
+    */
+    appendChild<TWebComponent extends Vidyano.WebComponents.WebComponent>(component: TWebComponent): TWebComponent;
+
+    /**
+    * Appends the Node to this component.
+    */
+    appendChild<TNode extends Node>(node: TNode): TNode;
+}declare namespace Vidyano {
     class CultureInfo {
         name: string;
         numberFormat: ICultureInfoNumberFormat;
@@ -5270,6 +6395,7 @@ interface ISetConstructor {
 declare const Set: ISetConstructor;
 declare namespace Vidyano {
     const version: string;
+    var cookiePrefix: string;
     enum NotificationType {
         Error = 0,
         Notice = 1,
@@ -5302,6 +6428,7 @@ declare namespace Vidyano {
             [type: string]: string;
         };
     }
+    function noop(): void;
     function extend(target: any, ...sources: any[]): any;
     function cookie(key: string, value?: any, options?: {
         force?: boolean;
@@ -5444,6 +6571,7 @@ declare namespace Vidyano {
         private _providers;
         private _isSignedIn;
         private _application;
+        private _isTrial;
         private _profile;
         private _profiledRequests;
         staySignedIn: boolean;
@@ -5464,6 +6592,8 @@ declare namespace Vidyano {
         _getStream(obj: PersistentObject, action?: string, parent?: PersistentObject, query?: Query, selectedItems?: Array<QueryResultItem>, parameters?: any): void;
         application: Application;
         private _setApplication(application);
+        isTrial: boolean;
+        private _setIsTrial(isTrial);
         language: ILanguage;
         isSignedIn: boolean;
         private _setIsSignedIn(val);
@@ -5486,7 +6616,7 @@ declare namespace Vidyano {
         signInExternal(providerName: string): void;
         signInUsingCredentials(userName: string, password: string): Promise<Application>;
         signInUsingDefaultCredentials(): Promise<Application>;
-        signOut(): void;
+        signOut(): Promise<any>;
         private _getApplication(data?);
         getQuery(id: string, asLookup?: boolean): Promise<Query>;
         getPersistentObject(parent: PersistentObject, id: string, objectId?: string): Promise<PersistentObject>;
@@ -5524,6 +6654,7 @@ declare namespace Vidyano {
         onConstructQueryResultItemValue(service: Service, item: QueryResultItem, value: any): QueryResultItemValue;
         onConstructQueryColumn(service: Service, col: any, query: Query): QueryColumn;
         onConstructAction(service: Service, action: Action): Action;
+        onSortPersistentObjectTabs(parent: Vidyano.PersistentObject, attributeTabs: Vidyano.PersistentObjectAttributeTab[], queryTabs: Vidyano.PersistentObjectQueryTab[]): Vidyano.PersistentObjectTab[];
         onMessageDialog(title: string, message: string, html: boolean, ...actions: string[]): Promise<number>;
         onSelectReference(query: Vidyano.Query): Promise<QueryResultItem[]>;
         onNavigate(path: string, replaceCurrent?: boolean): void;
@@ -5623,6 +6754,7 @@ declare namespace Vidyano {
         isDeleted: boolean;
         getAttribute(name: string): PersistentObjectAttribute;
         getAttributeValue(name: string): any;
+        setAttributeValue(name: string, value: any, allowRefresh?: boolean): Promise<any>;
         getQuery(name: string): Query;
         beginEdit(): void;
         cancelEdit(): void;
@@ -5634,7 +6766,7 @@ declare namespace Vidyano {
         toServiceObject(skipParent?: boolean): any;
         refreshFromResult(result: PersistentObject): void;
         triggerDirty(): void;
-        _triggerAttributeRefresh(attr: PersistentObjectAttribute): Promise<boolean>;
+        _triggerAttributeRefresh(attr: PersistentObjectAttribute, immediate?: boolean): Promise<boolean>;
         _prepareAttributesForRefresh(sender: PersistentObjectAttribute): void;
     }
     class PersistentObjectAttribute extends ServiceObject {
@@ -5654,7 +6786,7 @@ declare namespace Vidyano {
         private _isRequired;
         private _isReadOnly;
         private _isValueChanged;
-        protected _queueRefresh: boolean;
+        protected _shouldRefresh: boolean;
         private _refreshValue;
         id: string;
         name: string;
@@ -5679,12 +6811,14 @@ declare namespace Vidyano {
         tab: PersistentObjectAttributeTab;
         isSystem: boolean;
         isVisible: boolean;
+        private _setIsVisible(visibility);
         validationError: string;
         isRequired: boolean;
         private _setIsRequired(isRequired);
         isReadOnly: boolean;
         private _setIsReadOnly(isReadOnly);
         displayValue: string;
+        shouldRefresh: boolean;
         value: any;
         setValue(val: any, allowRefresh?: boolean): Promise<any>;
         isValueChanged: boolean;
@@ -5694,7 +6828,7 @@ declare namespace Vidyano {
         clearRegisteredInput(): void;
         _toServiceObject(): any;
         _refreshFromResult(resultAttr: PersistentObjectAttribute): boolean;
-        protected _triggerAttributeRefresh(): Promise<any>;
+        _triggerAttributeRefresh(immediate?: boolean): Promise<any>;
         private _setOptions(options);
     }
     class PersistentObjectAttributeWithReference extends PersistentObjectAttribute {
@@ -6007,6 +7141,14 @@ declare namespace Vidyano {
         type: string;
         execute(parameters?: any): Promise<any>;
     }
+    interface IActionExecuteOptions {
+        menuOption?: number;
+        parameters?: any;
+        selectedItems?: QueryResultItem[];
+        skipOpen?: boolean;
+        noConfirmation?: boolean;
+        throwExceptions?: boolean;
+    }
     class Action extends ServiceObject {
         service: Service;
         definition: ActionDefinition;
@@ -6021,7 +7163,6 @@ declare namespace Vidyano {
         private _offset;
         protected _isPinned: boolean;
         private _options;
-        skipOpen: boolean;
         selectionRule: (count: number) => boolean;
         displayName: string;
         dependentActions: any[];
@@ -6036,8 +7177,8 @@ declare namespace Vidyano {
         isPinned: boolean;
         options: string[];
         private _setOptions(options);
-        execute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], throwExceptions?: boolean): Promise<PersistentObject>;
-        _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+        execute(options?: IActionExecuteOptions): Promise<PersistentObject>;
+        protected _onExecute({menuOption, parameters, selectedItems, skipOpen, noConfirmation, throwExceptions}: IActionExecuteOptions): Promise<PersistentObject>;
         _getParameters(parameters: any, option: any): any;
         _onParentIsEditingChanged(isEditing: boolean): void;
         _onParentIsDirtyChanged(isDirty: boolean): void;
@@ -6048,7 +7189,7 @@ declare namespace Vidyano {
     namespace Actions {
         class RefreshQuery extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<any>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<any>;
         }
         class Filter extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
@@ -6056,35 +7197,35 @@ declare namespace Vidyano {
         class Edit extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
             _onParentIsEditingChanged(isEditing: boolean): void;
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class EndEdit extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
             _onParentIsEditingChanged(isEditing: boolean): void;
             _onParentIsDirtyChanged(isDirty: boolean): void;
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class Save extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class CancelSave extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class CancelEdit extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
             _onParentIsEditingChanged(isEditing: boolean): void;
             _onParentIsDirtyChanged(isDirty: boolean): void;
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class ExportToExcel extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class ShowHelp extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
-            _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[]): Promise<PersistentObject>;
+            protected _onExecute(option?: number, parameters?: any, selectedItems?: QueryResultItem[], executeOptions?: IActionExecuteOptions): Promise<PersistentObject>;
         }
         class viSearch extends Action {
             constructor(service: Service, definition: ActionDefinition, owner: ServiceObjectWithActions);
@@ -6196,7 +7337,6 @@ declare namespace Vidyano.WebComponents {
         unpinnedActions: Vidyano.Action[];
         canSearch: boolean;
         private _setHasCharts;
-        executeAction(e: Event, details: any, sender: HTMLElement): void;
         filterActions(actions: Vidyano.Action[], pinned: boolean): Vidyano.Action[];
         private _serviceObjectChanged(serviceObject);
         private _computeHasCharts(charts, isAttached);
@@ -6235,89 +7375,6 @@ declare namespace Vidyano.WebComponents {
         private _computeOpenOnHover(overflow, openOnHover);
     }
 }
-declare namespace Vidyano.WebComponents {
-    class AppConfig extends WebComponent {
-        private _defaultAttributeConfig;
-        private _persistentObjectConfigs;
-        private _attributeConfigs;
-        private _tabConfigs;
-        private _programUnitConfigs;
-        private _queryConfigs;
-        private _queryChartConfigs;
-        attached(): void;
-        getSetting(key: string, defaultValue?: string): string;
-        getPersistentObjectConfig(persistentObject: Vidyano.PersistentObject): PersistentObjectConfig;
-        getAttributeConfig(attr: Vidyano.PersistentObjectAttribute): PersistentObjectAttributeConfig;
-        getTabConfig(tab: Vidyano.PersistentObjectTab): PersistentObjectTabConfig;
-        getProgramUnitConfig(name: string): ProgramUnitConfig;
-        getQueryConfig(query: Vidyano.Query): QueryConfig;
-        getQueryChartConfig(type: string): QueryChartConfig;
-        private _getConfigs<T>(type);
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class AppSetting extends WebComponent {
-        key: string;
-        value: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class PersistentObjectAttributeConfig extends TemplateConfig<Vidyano.PersistentObjectAttribute> {
-        private _calculateHeight;
-        private _calculateWidth;
-        private height;
-        private width;
-        type: string;
-        name: string;
-        parentId: string;
-        parentObjectId: string;
-        component: string;
-        calculateHeight(attr: Vidyano.PersistentObjectAttribute): number;
-        calculateWidth(attr: Vidyano.PersistentObjectAttribute): number;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class PersistentObjectConfig extends TemplateConfig<Vidyano.PersistentObject> {
-        id: string;
-        objectId: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class PersistentObjectTabConfig extends TemplateConfig<Vidyano.PersistentObjectTab> {
-        name: string;
-        type: string;
-        objectId: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class ProgramUnitConfig extends TemplateConfig<Vidyano.ProgramUnit> {
-        name: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class QueryChartConfig extends TemplateConfig<Vidyano.QueryChart> {
-        type: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    class QueryConfig extends TemplateConfig<Vidyano.Query> {
-        name: string;
-        id: string;
-        defaultChart: string;
-    }
-}
-declare namespace Vidyano.WebComponents {
-    abstract class TemplateConfig<T> extends WebComponent {
-        private _template;
-        hasTemplate: boolean;
-        as: string;
-        asModel: (model: T) => any;
-        private _setHasTemplate;
-        attached(): void;
-        stamp(obj: T, as?: string, asModel?: (model: T) => any): DocumentFragment;
-        static register(info?: IWebComponentRegistrationInfo): (obj: any) => void;
-    }
-}
 declare var _gaq: any[];
 declare namespace Vidyano.WebComponents {
     const hashBang: string;
@@ -6354,8 +7411,8 @@ declare namespace Vidyano.WebComponents {
         private _routeUpdater;
         private _keybindingRegistrations;
         private routeMapVersion;
-        private _configuration;
         private _beforeUnloadEventHandler;
+        configuration: AppConfig;
         service: Vidyano.Service;
         programUnit: ProgramUnit;
         currentRoute: AppRoute;
@@ -6368,6 +7425,8 @@ declare namespace Vidyano.WebComponents {
         noMenu: boolean;
         label: string;
         keys: string;
+        isTracking: boolean;
+        private _setConfiguration;
         private _setInitializing;
         private _setRouteMapVersion;
         private _setKeys;
@@ -6375,7 +7434,6 @@ declare namespace Vidyano.WebComponents {
         private _setCurrentRoute;
         private _setProfilerLoaded;
         attached(): void;
-        configuration: AppConfig;
         initializationError: string;
         changePath(path: string, replaceCurrent?: boolean): void;
         getUrlForPersistentObject(id: string, objectId: string, pu?: ProgramUnit): string;
@@ -6388,19 +7446,23 @@ declare namespace Vidyano.WebComponents {
         cacheClear(): void;
         createServiceHooks(): ServiceHooks;
         redirectToSignIn(keepUrl?: boolean): void;
+        redirectToSignOut(keepUrl?: boolean): void;
         redirectToNotFound(): void;
         redirectToError(message: string, replaceCurrent?: boolean): void;
         showDialog(dialog: Dialog, options?: Vidyano.WebComponents.IDialogOptions): Promise<any>;
         showMessageDialog(options: Vidyano.WebComponents.IMessageDialogOptions): Promise<any>;
         private _computeIsProfiling(isSignedIn, profile, profilerLoaded);
+        private _configurationAttached(e, configuration);
+        private _cookiePrefixChanged(cookiePrefix);
         private _computeService(uri, user);
         private _onInitialized();
+        private _computeTrialMessage(isTrial);
         private _convertPath(application, path);
         private _updateRoute(path, initializing, routeMapVersion);
         private _appRouteAdded(e, detail);
         private _computeProgramUnit(application, path);
         private _computeShowMenu(isSignedIn, noMenu);
-        private _start(initializing, path);
+        private _start(initializing, path, currentRoute);
         private _cleanUpOnSignOut(isSignedIn);
         private _hookWindowBeforeUnload(noHistory, isAttached);
         private _beforeUnload(e);
@@ -6415,6 +7477,12 @@ declare namespace Vidyano.WebComponents {
         private _initializeGoogleAnalytics();
         trackEvent(action: string, option: string, owner: ServiceObjectWithActions): void;
         trackPageView(path: string): void;
+        getPersistentObjectConfig(persistentObject: Vidyano.PersistentObject, persistentObjectConfigs: linqjs.Enumerable<PersistentObjectConfig>): PersistentObjectConfig;
+        getAttributeConfig(attribute: Vidyano.PersistentObjectAttribute, attributeConfigs: linqjs.Enumerable<PersistentObjectAttributeConfig>): PersistentObjectAttributeConfig;
+        getTabConfig(tab: Vidyano.PersistentObjectTab, tabConfigs: linqjs.Enumerable<PersistentObjectTabConfig>): PersistentObjectTabConfig;
+        getProgramUnitConfig(name: string, programUnitConfigs: linqjs.Enumerable<ProgramUnitConfig>): ProgramUnitConfig;
+        getQueryConfig(query: Vidyano.Query, queryConfigs: linqjs.Enumerable<QueryConfig>): QueryConfig;
+        getQueryChartConfig(type: string, queryChartConfigs: linqjs.Enumerable<QueryChartConfig>): QueryChartConfig;
         onConstructQuery(service: Service, query: any, parent?: Vidyano.PersistentObject, asLookup?: boolean, maxSelectedItems?: number): Vidyano.Query;
         onActionConfirmation(action: Action, option: number): Promise<boolean>;
         onAction(args: ExecuteActionArgs): Promise<any>;
@@ -6425,6 +7493,93 @@ declare namespace Vidyano.WebComponents {
         onSessionExpired(): void;
         onNavigate(path: string, replaceCurrent?: boolean): void;
         onClientOperation(operation: ClientOperations.IClientOperation): void;
+        onQueryFileDrop(query: Vidyano.Query, name: string, contents: string): Promise<boolean>;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class AppConfig extends WebComponent {
+        private _defaultAttributeConfig;
+        private _persistentObjectConfigs;
+        private _attributeConfigs;
+        private _tabConfigs;
+        private _programUnitConfigs;
+        private _queryConfigs;
+        private _queryChartConfigs;
+        attached(): void;
+        getSetting(key: string, defaultValue?: string): string;
+        getPersistentObjectConfig(persistentObject: Vidyano.PersistentObject): PersistentObjectConfig;
+        getAttributeConfig(attribute: Vidyano.PersistentObjectAttribute): PersistentObjectAttributeConfig;
+        getTabConfig(tab: Vidyano.PersistentObjectTab): PersistentObjectTabConfig;
+        getProgramUnitConfig(name: string): ProgramUnitConfig;
+        getQueryConfig(query: Vidyano.Query): QueryConfig;
+        getQueryChartConfig(type: string): QueryChartConfig;
+        private _getConfigs<T>(type);
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class AppSetting extends WebComponent {
+        key: string;
+        value: string;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class PersistentObjectAttributeConfig extends TemplateConfig<Vidyano.PersistentObjectAttribute> {
+        private _calculateHeight;
+        private _calculateWidth;
+        private height;
+        private width;
+        type: string;
+        name: string;
+        parentId: string;
+        parentObjectId: string;
+        component: string;
+        calculateHeight(attr: Vidyano.PersistentObjectAttribute): number;
+        calculateWidth(attr: Vidyano.PersistentObjectAttribute): number;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class PersistentObjectConfig extends TemplateConfig<Vidyano.PersistentObject> {
+        id: string;
+        objectId: string;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class PersistentObjectTabConfig extends TemplateConfig<Vidyano.PersistentObjectTab> {
+        id: string;
+        name: string;
+        type: string;
+        objectId: string;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class ProgramUnitConfig extends TemplateConfig<Vidyano.ProgramUnit> {
+        name: string;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class QueryChartConfig extends TemplateConfig<Vidyano.QueryChart> {
+        type: string;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    class QueryConfig extends TemplateConfig<Vidyano.Query> {
+        name: string;
+        id: string;
+        defaultChart: string;
+        fileDropAttribute: string;
+        hideHeader: boolean;
+    }
+}
+declare namespace Vidyano.WebComponents {
+    abstract class TemplateConfig<T> extends WebComponent {
+        private _template;
+        hasTemplate: boolean;
+        as: string;
+        asModel: (model: T) => any;
+        private _setHasTemplate;
+        attached(): void;
+        stamp(obj: T, as?: string, asModel?: (model: T) => any): DocumentFragment;
+        static register(info?: IWebComponentRegistrationInfo): (obj: any) => void;
     }
 }
 declare namespace Vidyano.WebComponents {
@@ -6442,6 +7597,7 @@ declare namespace Vidyano.WebComponents {
         private _constructorChanged;
         private _parameters;
         private _documentTitleBackup;
+        allowSignedOut: boolean;
         active: boolean;
         path: string;
         deactivator: (result: boolean) => void;
@@ -6465,6 +7621,38 @@ declare namespace Vidyano.WebComponents {
         private _wasAttached;
         oneTime: boolean;
         attached(): void;
+    }
+}
+declare namespace Vidyano.WebComponents.Attributes {
+    class PersistentObjectAttributeEdit extends WebComponent {
+        private _setFocus;
+        attribute: Vidyano.PersistentObjectAttribute;
+        private _focus(e);
+        private _blur(e);
+        private _showError();
+        private _computeHasError(validationError);
+    }
+}
+declare namespace Vidyano.WebComponents.Attributes {
+    class PersistentObjectAttribute extends WebComponent {
+        static typeSynonyms: {
+            [key: string]: string[];
+        };
+        private _foreground;
+        attribute: Vidyano.PersistentObjectAttribute;
+        value: any;
+        editing: boolean;
+        nonEdit: boolean;
+        readOnly: boolean;
+        protected _attributeValueChanged(): void;
+        protected _optionsChanged(): void;
+        protected _attributeChanged(): void;
+        protected _editingChanged(): void;
+        protected _valueChanged(newValue: any): void;
+        private _computeHasError(validationError);
+        private _computeEditing(isEditing, nonEdit);
+        private _updateForegroundDataTypeHint(attribute, isEditing, isReadOnly);
+        static register(info?: IWebComponentRegistrationInfo): any;
     }
 }
 declare namespace Vidyano.WebComponents.Attributes {
@@ -6572,6 +7760,10 @@ declare namespace Vidyano.WebComponents.Attributes {
 declare namespace Vidyano.WebComponents.Attributes {
     class PersistentObjectAttributeDropDown extends WebComponents.Attributes.PersistentObjectAttribute {
         protected _valueChanged(newValue: any): void;
+        private _computeRadio(attribute);
+        private _isRadioChecked(option, value);
+        private _radioLabel(option);
+        private _radioChanged(e);
     }
 }
 declare namespace Vidyano.WebComponents.Attributes {
@@ -6612,6 +7804,10 @@ declare namespace Vidyano.WebComponents.Attributes {
 declare namespace Vidyano.WebComponents.Attributes {
     class PersistentObjectAttributeKeyValueList extends WebComponents.Attributes.PersistentObjectAttribute {
         protected _valueChanged(newValue: any): void;
+        private _computeRadio(attribute);
+        private _isRadioChecked(option, value);
+        private _radioLabel(option);
+        private _radioChanged(e);
     }
 }
 declare namespace Vidyano.WebComponents.Attributes {
@@ -6619,6 +7815,8 @@ declare namespace Vidyano.WebComponents.Attributes {
         maxlength: number;
         protected _attributeChanged(): void;
         private _editTextAreaBlur();
+        private _computeCodeMirror(attribute);
+        private _computeIsCodeMirrorReadOnly(readOnly, editing);
     }
 }
 declare namespace Vidyano.WebComponents.Attributes {
@@ -6685,12 +7883,17 @@ declare namespace Vidyano.WebComponents.Attributes {
         private _objectIdChanged();
         private _filterBlur();
         protected _editingChanged(): void;
-        private _browseReference(throwExceptions?);
+        private _browse(e);
+        private _browseReference(throwExceptions?, forceSearch?);
         private _addNewReference(e);
         private _clearReference(e);
         private _update();
+        private _openSelect();
         private _open(e);
         private _computeTarget(attribute, href);
+        private _computeSelectInPlaceAsRadio(attribute);
+        private _isRadioChecked(optionKey, objectId);
+        private _radioChanged(e);
     }
 }
 declare namespace Vidyano.WebComponents.Attributes {
@@ -6750,38 +7953,6 @@ declare namespace Vidyano.WebComponents.Attributes {
         private _computeCanBrowseReference(isReadOnly);
     }
 }
-declare namespace Vidyano.WebComponents.Attributes {
-    class PersistentObjectAttributeEdit extends WebComponent {
-        private _setFocus;
-        attribute: Vidyano.PersistentObjectAttribute;
-        private _focus(e);
-        private _blur(e);
-        private _showError();
-        private _computeHasError(validationError);
-    }
-}
-declare namespace Vidyano.WebComponents.Attributes {
-    class PersistentObjectAttribute extends WebComponent {
-        static typeSynonyms: {
-            [key: string]: string[];
-        };
-        private _foreground;
-        attribute: Vidyano.PersistentObjectAttribute;
-        value: any;
-        editing: boolean;
-        nonEdit: boolean;
-        readOnly: boolean;
-        protected _attributeValueChanged(): void;
-        protected _optionsChanged(): void;
-        protected _attributeChanged(): void;
-        protected _editingChanged(): void;
-        protected _valueChanged(newValue: any): void;
-        private _computeHasError(validationError);
-        private _computeEditing(isEditing, nonEdit);
-        private _updateForegroundDataTypeHint(attribute, isEditing, isReadOnly);
-        static register(info?: IWebComponentRegistrationInfo): any;
-    }
-}
 declare namespace Vidyano.WebComponents {
     class Button extends WebComponents.WebComponent {
         private _setCustomLayout;
@@ -6807,8 +7978,30 @@ declare namespace Vidyano.WebComponents {
         checked: boolean;
         label: string;
         disabled: boolean;
+        radio: boolean;
         toggle(): void;
         private _computeIsNull(checked);
+        private _computeIcon(radio);
+    }
+}
+declare type CM = CodeMirror.EditorFromTextArea;
+declare const CMFromTextArea: typeof CodeMirror.fromTextArea;
+declare namespace Vidyano.WebComponents {
+    class CodeMirror extends WebComponents.WebComponent {
+        private static _styleSheetAttached;
+        private _codeMirror;
+        private _codeMirrorValueChangedHandler;
+        initialized: boolean;
+        readOnly: boolean;
+        value: string;
+        private _initialize(mode, isAttached);
+        private _refresh(size, initialized);
+        private _codeMirrorValueChanged();
+        private _valueChanged(newValue);
+        private _modeChanged(mode, initialized);
+        private _lineNumbersChanged(lineNumbers, initialized);
+        private _smartIndentChanged(smartIndent, initialized);
+        private _readOnlyChanged(readOnly, initialized);
     }
 }
 declare namespace Vidyano.WebComponents {
@@ -6872,6 +8065,20 @@ declare namespace Vidyano.WebComponents {
     }
 }
 declare namespace Vidyano.WebComponents {
+    interface IFileDropDetails {
+        name: string;
+        contents: string;
+    }
+    class FileDrop extends WebComponent {
+        dragOver: boolean;
+        private _setDragOver;
+        private _dragEnter(e);
+        private _dragOver(e);
+        private _dragLeave(e);
+        private _drop(e);
+    }
+}
+declare namespace Vidyano.WebComponents {
     class Grid extends WebComponent {
     }
 }
@@ -6913,11 +8120,14 @@ declare namespace Vidyano.WebComponents {
 }
 declare namespace Vidyano.WebComponents {
     class Menu extends WebComponent {
+        private static _minResizeWidth;
+        private _resizeWidth;
         filter: string;
         filtering: boolean;
         activeProgramUnit: ProgramUnit;
         collapsed: boolean;
         hasGlobalSearch: boolean;
+        private _setIsResizing;
         attached(): void;
         detached(): void;
         private _filterChanged();
@@ -6929,23 +8139,29 @@ declare namespace Vidyano.WebComponents {
         private _countItems(programUnitItems);
         private _focusSearch();
         private _catchInputSearchTap(e);
+        private _resetFilter(e);
+        private _onResize(e, detail);
     }
     class MenuItem extends WebComponent {
         item: Vidyano.ProgramUnitItem;
         programUnit: Vidyano.ProgramUnit;
         expand: boolean;
+        collapsed: boolean;
         filter: string;
         filtering: boolean;
-        hide: boolean;
+        hidden: boolean;
         filterParent: ProgramUnitItem;
         private _setExpand;
+        private _updateIndentVariable(level);
+        private _computeSubLevel(level);
         private _tap(e);
         private _filterChanged();
         private _hasMatch(item, search);
         private _programUnitChanged();
         private _updateItemTitle(item, filter, filtering, collapsed);
+        private _computeIcon(item);
         private _computedHasItems(item);
-        private _computedHref(item);
+        private _computedHref(item, app);
         private _titleMouseenter();
     }
 }
@@ -7036,6 +8252,7 @@ declare namespace Vidyano.WebComponents {
         private _hasMasterTabs(tabs);
         private _hasDetailTabs(tabs);
         private _tabselect(e, detail);
+        private _persistentObjectNotificationChanged(notification);
         private _trackSplitter(e, detail);
     }
     class PersistentObjectDetailsContent extends WebComponent {
@@ -7059,18 +8276,25 @@ declare namespace Vidyano.WebComponents {
         private _computeEditing(isEditing, nonEdit);
         private _nonEditChanged(nonEdit);
         private _computeRequired(attribute, required, value);
+        private _computeHasError(validationError);
+        private _isHidden(isVisible);
         private _loadingChanged(loading);
     }
 }
 declare namespace Vidyano.WebComponents {
+    interface IPersistentObjectDialogOptions {
+        saveLabel?: string;
+        save?: (po: Vidyano.PersistentObject, close: () => void) => void;
+    }
     class PersistentObjectDialog extends Dialog {
         persistentObject: Vidyano.PersistentObject;
-        private _forwardSave;
+        private _options;
         private _saveHook;
         tab: Vidyano.PersistentObjectAttributeTab;
-        constructor(persistentObject: Vidyano.PersistentObject, _forwardSave?: boolean);
+        constructor(persistentObject: Vidyano.PersistentObject, _options?: IPersistentObjectDialogOptions);
         private _save();
         private _cancel();
+        private _computeSaveLabel(isAttached);
         private _computeTab(persistentObject, isAttached);
         private _computeReadOnly(tab);
         private _onSelectAction(e);
@@ -7086,7 +8310,7 @@ declare namespace Vidyano.WebComponents {
         columns: number;
         loading: boolean;
         private _setLoading;
-        private _computeLabel(group, groupIndex, isAttached);
+        private _computeLabel(group, groupIndex, translations);
         private _arrange(attributes, columns, attached);
         private _itemFromAttribute(attribute);
         private _onAttributeLoading(e);
@@ -7137,6 +8361,9 @@ declare namespace Vidyano.WebComponents {
         private _select();
         private _computeIsSelected(tab, selectedTab);
         private _computeHasBadge(badge);
+        private _computeLabel(tabLabel, query, queryLabel);
+        private _computeQuery(tab);
+        private _computeQueryLabel(label, currentFilter);
     }
 }
 declare namespace Vidyano.WebComponents {
@@ -7295,6 +8522,8 @@ declare namespace Vidyano.WebComponents {
         private _queryChanged();
         private _computeNoActions(actions);
         private _computeSearchOnHeader(noActions, query);
+        private _computeLabel(labelWithTotalItems, currentFilter);
+        private _computeHideHeader(query, app);
     }
 }
 declare namespace Vidyano.WebComponents {
@@ -7438,6 +8667,7 @@ declare namespace Vidyano.WebComponents {
         private _load(e);
         private _saveAs();
         private _save();
+        private _edit(e);
         private _delete(e);
     }
 }
@@ -7454,6 +8684,7 @@ declare namespace Vidyano.WebComponents {
     class QueryGrid extends WebComponent {
         private static tableCache;
         private static perf;
+        static profile: boolean;
         private _tableData;
         private _tableHeader;
         private _tableFooter;
@@ -7475,16 +8706,19 @@ declare namespace Vidyano.WebComponents {
         private _settings;
         private _columnMenuColumn;
         private _lastUpdated;
+        private _reorderRow;
         canReorder: boolean;
         rowHeight: number;
         viewportSize: ISize;
         query: Vidyano.Query;
         asLookup: boolean;
         initializing: boolean;
+        isReordering: boolean;
         private _setInitializing;
         private _setViewportSize;
         private _setRowHeight;
         private _setColumnWidthsCalculated;
+        private _setIsReordering;
         attached(): void;
         detached(): void;
         isColumnInView(column: QueryGridColumn): boolean;
@@ -7492,7 +8726,7 @@ declare namespace Vidyano.WebComponents {
         private _actionMenu;
         private _columnMenu;
         private _initializingChanged();
-        private _sizeChanged(e, detail);
+        private _viewportSizeChanged(viewportSize);
         private _verticalScrollOffsetChanged(verticalScrollOffset);
         private _horizontalScrollOffsetChanged(horizontalScrollOffset);
         private _computeSettings(columns);
@@ -7502,7 +8736,7 @@ declare namespace Vidyano.WebComponents {
         private _computeCanSelectAll(canSelect, isAvailable);
         private _computeInlineActions(query, noInlineActions);
         private _computeHasTotalItem(totalItem, items, columnWidthsUpdated);
-        private _updateTables(items, columns, canReorder, isAttached);
+        private _updateTables(items, columns, canReorder);
         private _updateVerticalSpacer(totalItems, rowHeight);
         private _updateTableHeadersAndFooters(columns);
         private _updateTableData(items, columns);
@@ -7511,6 +8745,8 @@ declare namespace Vidyano.WebComponents {
         private _updateColumnWidths();
         private _columnWidthsUpdated(e?, detail?);
         private _requestAnimationFrame(action);
+        private _dragStart(e);
+        private _dragEnd(e, details);
         private _itemSelect(e, detail);
         private _itemActions(e, detail);
         private _contextmenuData(e);
@@ -7518,6 +8754,10 @@ declare namespace Vidyano.WebComponents {
         private _contextmenuColumn(e);
         private _togglePin();
         private _configureColumns();
+        private _upArrow(e);
+        private _pageUp(e);
+        private _downArrow(e);
+        private _pageDown(e);
         private _preventScroll(e);
     }
     class QueryGridColumn implements IQueryGridUserSettingsColumnData {
@@ -7592,7 +8832,6 @@ declare namespace Vidyano.WebComponents {
     class QueryGridTableDataBody extends Sortable {
         private _table;
         constructor(_table: QueryGridTableData);
-        protected _dragEnd(element: HTMLElement, newIndex: number, oldIndex: number): void;
     }
     abstract class QueryGridTableRow {
         private _table;
@@ -7714,9 +8953,12 @@ declare namespace Vidyano.WebComponents {
         private _renderedQuery;
         query: Vidyano.Query;
         templated: boolean;
+        fileDrop: boolean;
         private _setLoading;
         private _setTemplated;
+        private _setFileDrop;
         private _renderQuery(query, currentChart, isAttached);
+        private _onFileDropped(e, details);
         private _refresh();
         private _new();
         private _delete();
@@ -7735,7 +8977,7 @@ declare namespace Vidyano.WebComponents {
         attached(): void;
         private _activate(e);
         private _computeHasError(error);
-        private _computeQuery(queryId, isAttached);
+        private _computeQuery(queryId, app);
         private _queryChanged(query, oldQuery);
         private _renderQuery(query);
         private _updateTitle(title);
@@ -7772,6 +9014,7 @@ declare namespace Vidyano.WebComponents {
         private _horizontalScrollLeft;
         private _horizontalScrollSpace;
         private _trackStart;
+        private _zenscroll;
         outerWidth: number;
         outerHeight: number;
         innerWidth: number;
@@ -7783,6 +9026,8 @@ declare namespace Vidyano.WebComponents {
         horizontalScrollOffset: number;
         verticalScrollOffset: number;
         forceScrollbars: boolean;
+        noScrollShadow: boolean;
+        private _setAtTop;
         private _setOuterWidth;
         private _setOuterHeight;
         private _setInnerWidth;
@@ -7793,8 +9038,9 @@ declare namespace Vidyano.WebComponents {
         private _setScrollBottomShadow;
         private _setHiddenScrollbars;
         scroller: HTMLElement;
-        scrollToTop(): void;
-        scrollToBottom(): void;
+        private _initializeZenscroll();
+        scrollToTop(animated?: boolean): void;
+        scrollToBottom(animated?: boolean): void;
         private _outerSizeChanged(e, detail);
         private _innerSizeChanged(e, detail);
         private _updateVerticalScrollbar(outerHeight, innerHeight, verticalScrollOffset, noVertical);
@@ -7824,9 +9070,11 @@ declare namespace Vidyano.WebComponents {
         private _pendingSelectedOption;
         options: string[] | Common.IKeyValuePair[];
         selectedOption: string;
+        readonly: boolean;
         private _setSuggestion;
         private _setSelectedItem;
         private _setFiltering;
+        open(): void;
         private popup;
         private _keydown(e);
         private _keyup(e);
@@ -7859,7 +9107,7 @@ declare namespace Vidyano.WebComponents {
     class SelectReferenceDialog extends Dialog {
         query: Vidyano.Query;
         canSelect: boolean;
-        constructor(query: Vidyano.Query);
+        constructor(query: Vidyano.Query, forceSearch?: boolean);
         private _selectedItemsChanged();
         private _invalidateCanSelect(selectedItems?);
         private _queryPropertyChanged(sender, detail);
@@ -7871,7 +9119,7 @@ declare namespace Vidyano.WebComponents {
 declare namespace Vidyano.WebComponents {
     class SessionPresenter extends WebComponent {
         private _customTemplate;
-        private _computeApplication(isAttached);
+        private _computeApplication(app);
         private _computeSession(session);
     }
 }
@@ -7894,17 +9142,18 @@ declare namespace Vidyano.WebComponents {
         expand: boolean;
         signingIn: boolean;
         signingInCounter: number;
+        private _setIsVidyano;
         private _setExpand;
         private _setSigningIn;
+        constructor(isVidyano?: boolean);
         private _vidyanoSignInAttached();
         private _keydown(e);
         private _computeLabel();
         private _computeDescription();
-        private _computeIsVidyano();
         private _tap();
         private _autoFocus();
         private _signIn();
-        private _computeSigninButtonLabel(signingIn, signingInCounter);
+        private _computeSigninButtonLabel(signingIn, signingInCounter, app);
     }
 }
 declare namespace Vidyano.WebComponents {
@@ -7932,6 +9181,11 @@ declare namespace Vidyano.WebComponents {
     }
 }
 declare namespace Vidyano.WebComponents {
+    interface ISortableDragEndDetails {
+        element: HTMLElement;
+        newIndex: number;
+        oldIndex: number;
+    }
     abstract class Sortable extends WebComponent {
         private _sortable;
         group: string;
@@ -7957,10 +9211,12 @@ declare namespace Vidyano.WebComponents {
 }
 declare namespace Vidyano.WebComponents {
     class Spinner extends WebComponent {
+        private _updateColor(color, isAttached);
     }
 }
 declare namespace Vidyano.WebComponents {
     class Style extends Vidyano.WebComponents.WebComponent {
+        static profile: boolean;
         private _uniqueId;
         private _styleElement;
         private _styles;
@@ -8209,6 +9465,10 @@ declare namespace Vidyano.WebComponents {
          */
         resolveUrl: (href: string) => string;
         /**
+         * Gets a path's value.
+         */
+        get: (path: string, root?: WebComponent) => any;
+        /**
          * Sets a path's value and notifies Polymer for a change for that path.
          */
         set: (path: string, value: any, root?: WebComponent) => void;
@@ -8267,22 +9527,24 @@ declare namespace Vidyano.WebComponents {
     }
     abstract class WebComponent extends PolymerBase {
         private _appRequested;
-        protected translations: any;
+        private _app;
+        private _appInitializedListener;
         className: string;
         classList: DOMTokenList;
         tagName: string;
         style: CSSStyleDeclaration;
         isAttached: boolean;
         app: Vidyano.WebComponents.App;
-        protected _setApp: (app: Vidyano.WebComponents.App) => void;
-        attached(): void;
-        detached(): void;
-        private _setIsAttached(attached);
+        translations: any;
+        private _setTranslations;
+        protected attached(): void;
+        protected detached(): void;
         empty(parent?: Node, condition?: (e: Node) => boolean): void;
-        findParent<T>(condition: (element: Node) => boolean): T;
+        findParent<T>(condition: (element: Node) => boolean, parent?: Node): T;
         translateMessage(key: string, ...params: string[]): string;
         protected escapeHTML(val: string): string;
         protected _forwardObservable(source: Vidyano.Common.Observable<any> | Array<any>, path: string, pathPrefix: string, callback?: (path: string) => void): IObserveChainDisposer;
+        private _computeApp(isAttached);
         private _forwardComputed(value);
         private _forwardNegate(value);
         static getName(fnc: Function): string;
@@ -8293,7 +9555,11 @@ declare namespace Vidyano.WebComponents {
 }
 declare namespace Vidyano.WebComponents {
     class Website extends WebComponent {
+        serviceUri: string;
+        serviceHooks: string;
+        cookiePrefix: string;
         attached(): void;
+        private _cookiePrefixChanged(cookiePrefix);
     }
     class WebsiteAppServiceHooks extends AppServiceHooks {
         createData(data: any): void;
