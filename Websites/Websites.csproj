@@ -117,7 +117,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Vidyano.Web2, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Vidyano.Web2.1.2.0-beta3\lib\net45\Vidyano.Web2.dll</HintPath>
+      <HintPath>..\packages\Vidyano.Web2.1.2.0-beta4\lib\net45\Vidyano.Web2.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
