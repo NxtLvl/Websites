@@ -1,7 +1,7 @@
 ﻿//$mainColor: #006665;
 $mainColor: #A9CF24;
 $accentColor: #A9CF24;
-$textColor: #4a4a4a;
+$textColor: #F0F0F0;
 $otherColor: #eaebec;
 
 html, body {
@@ -12,7 +12,10 @@ html, body {
 }
 
 paper-toolbar {
-    background-color: $mainColor !important;
+    background-color: #14171B !important;
+    background-image: -webkit-linear-gradient(bottom,#14171B,#22252A) !important;
+    background-image: linear-gradient(to top,#14171B,#22252A) !important;
+    border-bottom: 7px solid $mainColor;
 
     &.header {
         paper-icon-button[icon="menu"] {
@@ -79,6 +82,12 @@ section {
     padding: 40px 80px;
     box-sizing: border-box;
     text-align: center;
+    background-color: #22252A;
+    border-bottom: 1px solid #3A3D46;
+
+    &:nth-child(odd) {
+        background-color: #141619;
+    }
 
     marked-element {
         max-width: 1000px;
@@ -98,160 +107,134 @@ section {
         font-size: 24px;
         color: $textColor;
         font-weight: 600;
-        text-transform: uppercase;
         margin-top: 0;
+        text-transform: uppercase;
+        margin-bottom: 36px;
     }
 
     &#Home {
-        background-image: url(images/Banner.jpg);
-        background-repeat: repeat-x;
-        background-size: cover;
+        background-image: url(images/Banner-bg.jpg);
+        background-color: #090909;
+        background-repeat: no-repeat;
+        background-size: contain;
         background-position: center center;
         color: $textColor;
         min-height: 500px;
         text-transform: uppercase;
         position: relative;
+        padding: 24px;
 
-        [is-phone] & {
-            padding-left: 12px;
-            padding-right: 12px;
-        }
-
-        &:before {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            content: " ";
-        }
-
-        marked-element {
-            max-width: 800px;
-        }
-
-        .title {
-            font-size: 48px;
-            line-height: normal;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
-
-
-            [is-tablet] &, [is-phone] & {
-                font-size: 32px;
-            }
-        }
-
-        a {
-            color: white !important;
-            text-decoration: none !important;
-        }
-
-        paper-button {
-            background-color: $accentColor;
-            margin-top: 40px;
-            font-size: 18px;
-            line-height: 20px;
-            width: 150px;
+        img {
+            max-width: 100%;
         }
     }
 
-    &#OurStory {
-        .title {
-            font-weight: 600;
-        }
-
-        img {
-            max-height: 250px;
-            margin-left: 100px;
-        }
-
-        p {
-            text-indent: 50px;
-            text-align: justify;
-            font-size: 18px;
-            color: $textColor;
-        }
+    &#Mission {
+        color: $mainColor;
+        font-size: 24px;
+        line-height: 1.5em;
     }
 
     &#OurAffiliates {
-        border-top: 1px solid $otherColor;
+        .affiliate {
+            border-radius: 6px;
+            width: 1000px;
+            max-width: 90vw;
+            overflow: hidden;
 
-        .companies {
-            padding: 25px 12px 0 12px;
-        }
-
-        .company {
-            text-align: justify;
-            color: $textColor;
-            font-size: 16px;
-            border-color: $otherColor;
-            border-style: solid;
-            border-width: 0 0 3px 0;
-            margin: 25px 0 50px 0;
-            -moz-transition: border-color 0.55s ease;
-            -o-transition: border-color 0.55s ease;
-            -webkit-transition: border-color 0.55s ease;
-            transition: border-color 0.55s ease;
-
-            &:hover {
-                border-bottom-color: $mainColor;
+            &:not(:last-of-type) {
+                margin-bottom: 48px;
             }
 
-            &:first-child {
-                margin-top: 0;
-            }
+            header {
+                height: 60vh;
+                border-bottom: 8px $mainColor;
 
-            .logo {
-                width: 128px;
+                nav {
+                    border-top: 1px solid white;
+                    border-bottom: 8px solid $mainColor;
 
-                > img {
-                    max-width: 80%;
+                    a {
+                        display: block;
+                        width: 50px;
+                        height: 50px;
+                        background-repeat: no-repeat;
+                        background-position: center center;
+                        background-size: 32px 32px;
+
+                        &.browse {
+                            background-image: url(Images/browse.png);
+                        }
+
+                        &.share {
+                            background-image: url(Images/share.png);
+                        }
+
+                        &:not(:first-of-type) {
+                            margin-right: 6px;
+                        }
+
+                        &:hover {
+                            background-color: rgba(255, 255, 255, 0.2);
+                        }
+                    }
                 }
             }
 
-            > div.flex {
-                padding: 25px 12px 12px 12px;
-
-                > h4 {
-                    color: $mainColor;
-                    font-size: 25px;
-                    font-weight: 600;
-                    text-align: left;
-                }
-
-                a {
-                    color: $accentColor;
-                    font-weight: 600;
-                    text-decoration: none;
+            vi-grid {
+                background-color: white;
+                color: #333;
+                padding: 24px;
+                font-size: 16px;
+                line-height: 1.5em;
+                
+                .logo {
+                    background-repeat:  no-repeat;
+                    background-size: contain;
+                    background-position: center center;
+                    height: 100px;
                 }
             }
 
-            &:last-child {
-                margin-bottom: 0;
+            &#twosky {
+                background-image: url(images/2sky-bg.jpg);
+                background-size: cover;
+
+                .logo {
+                    background-image: url(images/2sky_logo.png);
+                }
+            }
+
+            &#rhea {
+                background-image: url(images/rhea_bg.jpg);
+                background-size: cover;
+
+                .logo {
+                    background-image: url(images/rhea_logo.png);
+                }
+            }
+
+            &#softn {
+                background-image: url(images/SoftN_bg.jpg);
+                background-size: cover;
+
+                .logo {
+                    background-image: url(images/softn_logo.png);
+                }
             }
         }
     }
 
     &#Contact {
-        border-top: 1px solid #eaebec;
-        background-color: #FCFCFD;
-    }
-
-
-    &#References{
-        background-color:$mainColor;
-        color:white;
-        font-size:24px;
-        
-        letter-spacing:3px;
+        #content {
+            width: 1000px;
+            max-width: 90vw;
+        }
     }
 }
 
 footer {
     padding: 32px 16px;
     color: white;
-    background-color: $mainColor;
+    background-color: #141619;
 }

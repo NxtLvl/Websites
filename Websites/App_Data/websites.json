@@ -10,7 +10,7 @@
         "en": "Nxt lvl",
         "pt": "Nxt lvl"
       },
-      "Type": 1,
+      "Type": 3,
       "Bindings": [
         "*",
         "nxtlvl.be"
@@ -36,6 +36,15 @@
           "Offset": 5
         },
         {
+          "Name": "Mission",
+          "Label": {
+            "en": "Mission",
+            "pt": "Mission"
+          },
+          "Queries": [],
+          "Offset": 6
+        },
+        {
           "Name": "OurAffiliates",
           "Label": {
             "en": "Our affiliates",
@@ -43,24 +52,6 @@
           },
           "Queries": [],
           "Offset": 7
-        },
-        {
-          "Name": "OurStory",
-          "Label": {
-            "en": "Our story",
-            "pt": "Our story"
-          },
-          "Queries": [],
-          "Offset": 6
-        },
-        {
-          "Name": "References",
-          "Label": {
-            "en": "References",
-            "pt": "References"
-          },
-          "Queries": [],
-          "Offset": 8
         }
       ]
     },

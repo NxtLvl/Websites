@@ -1,33 +1,55 @@
-﻿## Our Affiliates
-<div class="companies">
-    <div class="company layout horizontal">
-        <div class="layout horizontal center-center logo">
-            <img src="static/images/Rhea_logo.png" />
-        </div>
+﻿## Our affiliates
+
+<div class="affiliate" id="twosky">
+    <header class="vertical layout">
         <div class="flex">
-            <h4>Rhea</h4>
-            Stet delectus est ut, te pri dicant eripuit. Nostrud invenire no eos, quod affert ancillae sed eu. Usu ne quaeque constituam eloquentiam, no menandri persecuti cotidieque pro. Case inimicus nec an, accumsan instructior usu at. Homero alienum partiendo sit ne, assum dictas ocurreret eu pri.
-            <p>Visit us at <a href="http://www.rhea.be">www.rhea.be</a></p>
+            <h1></h1>
         </div>
-    </div>
-    <div class="company layout horizontal">
-        <div class="layout horizontal center-center logo">
-            <img src="static/images/2sky_logo.png" />
+        <nav class="layout horizontal-reverse">
+            <a class="browse" href="https://www.2sky.be"></a>
+            <a class="share" href="https://www.2sky.be"></a>
+        </nav>
+    </header>
+    <vi-grid>
+        <div desktop-3 class="logo"></div>
+        <div desktop-9 class="layout horizontal center-center">
+            Ontwikkeling van tools om op een snelle manier, software code te ontwikkelen volgens standaarden die eenvoudig mee evolueren en onderhouds laag zijn.
         </div>
+    </vi-grid>
+</div>
+
+<div class="affiliate" id="rhea">
+    <header class="vertical layout">
         <div class="flex">
-            <h4>2sky</h4>
-            2sky focuses on pushing the development for the Microsoft technology stack using its in-house developed product, Vidyano. Using this product allows 2sky to take a leading role in migrating applications to the Windows Azure platform in no time. Customers can take advantage of Vidyano to create applications uing their own development department or by taking advantage of 2sky's software development services.
-            <p>Visit us at <a href="http://www.2sky.be">www.2sky.be</a></p>
+            <h1></h1>
         </div>
-    </div>
-    <div class="company layout horizontal">
-        <div class="layout horizontal center-center logo">
-            <img src="static/images/SoftN_logo.png" />
+        <nav class="layout horizontal-reverse">
+            <a class="browse" href="https://www.rhea.be"></a>
+            <a class="share" href="https://www.rhea.be"></a>
+        </nav>
+    </header>
+    <vi-grid>
+        <div desktop-3 class="logo"></div>
+        <div desktop-9 class="layout horizontal center-center">
+            Support van oplossingen en pakketten. Gemaakt door eigen mensen of door derden, ondersteund volgens de ITIL standaard.
         </div>
+    </vi-grid>
+</div>
+
+<div class="affiliate" id="softn">
+    <header class="vertical layout">
         <div class="flex">
-            <h4>SoftN</h4>
-            Stet delectus est ut, te pri dicant eripuit. Nostrud invenire no eos, quod affert ancillae sed eu. Usu ne quaeque constituam eloquentiam, no menandri persecuti cotidieque pro. Case inimicus nec an, accumsan instructior usu at. Homero alienum partiendo sit ne, assum dictas ocurreret eu pri.
-            <p>Visit us at <a href="http://www.softn.be">www.softN.be</a></p>
+            <h1></h1>
         </div>
-    </div>
+        <nav class="layout horizontal-reverse">
+            <a class="browse" href="https://www.softn.be"></a>
+            <a class="share" href="https://www.softn.be"></a>
+        </nav>
+    </header>
+    <vi-grid>
+        <div desktop-3 class="logo"></div>
+        <div desktop-9 class="layout horizontal center-center">
+            Een totaal oplossing voor thuisverpleegkundigen, ontwikkeld door 2sky en gesupporteerd door Rhea.
+        </div>
+    </vi-grid>
 </div>
