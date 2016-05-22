@@ -6,8 +6,8 @@
             <h1></h1>
         </div>
         <nav class="layout horizontal-reverse">
-            <a class="browse" href="https://www.2sky.be"></a>
-            <a class="share" href="https://www.2sky.be"></a>
+            <a class="browse" href="https://www.2sky.be" target="_blank"></a>
+            <a class="share" href="about:blank" target="_blank"></a>
         </nav>
     </header>
     <vi-grid>
@@ -24,8 +24,8 @@
             <h1></h1>
         </div>
         <nav class="layout horizontal-reverse">
-            <a class="browse" href="https://www.rhea.be"></a>
-            <a class="share" href="https://www.rhea.be"></a>
+            <a class="browse" href="https://www.rhea.be" target="_blank"></a>
+            <a class="share" href="about:blank" target="_blank"></a>
         </nav>
     </header>
     <vi-grid>
@@ -42,8 +42,8 @@
             <h1></h1>
         </div>
         <nav class="layout horizontal-reverse">
-            <a class="browse" href="https://www.softn.be"></a>
-            <a class="share" href="https://www.softn.be"></a>
+            <a class="browse" href="https://www.softn.be" target="_blank"></a>
+            <a class="share" href="about:blank" target="_blank"></a>
         </nav>
     </header>
     <vi-grid>
