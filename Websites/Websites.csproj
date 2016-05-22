@@ -144,7 +144,10 @@
     <Content Include="App_Data\Websites\NxtLvl\Images\favicon.ico" />
     <Content Include="App_Data\Websites\NxtLvl\Images\logo.png" />
     <Content Include="App_Data\Websites\NxtLvl\Images\ourStory.jpg" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\Rhea_bg.jpg" />
     <Content Include="App_Data\Websites\NxtLvl\Images\Rhea_logo.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\share.png" />
+    <Content Include="App_Data\Websites\NxtLvl\Images\softn_bg.jpg" />
     <Content Include="App_Data\Websites\NxtLvl\Images\SoftN_logo.png" />
     <Content Include="App_Data\Websites\NxtLvl\index.html" />
     <Content Include="App_Data\Websites\NxtLvl\nxtlvl.css">
