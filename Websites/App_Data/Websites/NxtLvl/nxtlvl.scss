@@ -119,10 +119,11 @@ section {
         background-size: contain;
         background-position: center center;
         color: $textColor;
-        min-height: 500px;
+        height: 500px;
         text-transform: uppercase;
         position: relative;
         padding: 24px;
+        max-height: 90vw;
 
         img {
             max-width: 100%;
@@ -192,6 +193,7 @@ section {
                     background-repeat:  no-repeat;
                     background-size: contain;
                     background-position: center center;
+                    margin: auto;
                     height: 100px;
                 }
             }
