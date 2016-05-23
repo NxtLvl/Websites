@@ -24,7 +24,7 @@
             <h1></h1>
         </div>
         <nav class="layout horizontal-reverse">
-            <a class="browse" href="https://www.rhea.be" target="_blank"></a>
+            <a class="browse" href="http://www.rhea.be" target="_blank"></a>
             <a class="share" href="about:blank" target="_blank"></a>
         </nav>
     </header>
@@ -42,7 +42,7 @@
             <h1></h1>
         </div>
         <nav class="layout horizontal-reverse">
-            <a class="browse" href="https://www.softn.be" target="_blank"></a>
+            <a class="browse" href="http://www.softn.be" target="_blank"></a>
             <a class="share" href="about:blank" target="_blank"></a>
         </nav>
     </header>
